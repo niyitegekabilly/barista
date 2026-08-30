@@ -90,7 +90,7 @@
                     <li class="nav-item">
                         <a class="nav-link <?= nav_active('jobs') ?>" href="<?= url('jobs') ?>">
                             <?= __('app.jobs') ?>
-                            <span class="badge-nav-pill badge-nav-hot ms-1">HOT</span>
+                            <span class="badge-career-pulse ms-1">HOT</span>
                         </a>
                     </li>
                     <li class="nav-item">
