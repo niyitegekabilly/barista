@@ -138,6 +138,24 @@ if (!function_exists('storage_url')) {
     }
 }
 
+if (!function_exists('nav_active')) {
+    function nav_active(string $path = '', string $activeClass = 'active'): string {
+        $uri = trim(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/');
+        $scriptDir = trim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/\\');
+        if ($scriptDir !== '' && str_starts_with($uri, $scriptDir)) {
+            $uri = trim(substr($uri, strlen($scriptDir)), '/');
+        }
+        $target = trim($path, '/');
+        if ($target === '' && ($uri === '' || $uri === 'home')) {
+            return $activeClass;
+        }
+        if ($target !== '' && (str_starts_with($uri, $target) || $uri === $target)) {
+            return $activeClass;
+        }
+        return '';
+    }
+}
+
 if (!function_exists('course_thumbnail')) {
     function course_thumbnail(?string $thumb = null, int $index = 0): string {
         $fallbacks = [
