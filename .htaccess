@@ -1,16 +1,16 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /bbacademy/
-
-    # Rewrite asset requests to point to public folder
-    RewriteRule ^assets/(.*)$ public/assets/$1 [L]
-    RewriteRule ^uploads/(.*)$ public/uploads/$1 [L]
 
     # Block access to sensitive directories
     RewriteRule ^(config|database|storage|app|resources|\.env|\.git)/ - [F]
 
-    # Don't rewrite if it's a real file
-    RewriteCond %{REQUEST_FILENAME} -f
+    # Rewrite asset and upload requests to public folder
+    RewriteRule ^assets/(.*)$ public/assets/$1 [L,NC]
+    RewriteRule ^uploads/(.*)$ public/uploads/$1 [L,NC]
+
+    # Don't rewrite if it's a real file or directory
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]
 
     # Route all other requests to public/index.php

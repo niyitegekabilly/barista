@@ -65,9 +65,33 @@ if (!function_exists('config')) {
 
 if (!function_exists('app_url')) {
     function app_url(string $path = ''): string {
-        $baseUrl = rtrim(config('app.url', 'http://localhost/bbacademy'), '/');
+        static $resolvedBaseUrl = null;
+        if ($resolvedBaseUrl === null) {
+            $configured = config('app.url', '');
+            $isLiveHost = isset($_SERVER['HTTP_HOST']) && !in_array($_SERVER['HTTP_HOST'], ['localhost', '127.0.0.1', '::1']);
+            $hasPlaceholder = empty($configured) || str_contains($configured, 'yourdomain.com') || ($isLiveHost && str_contains($configured, 'localhost'));
+            
+            if (!$hasPlaceholder && !empty($configured)) {
+                $resolvedBaseUrl = rtrim($configured, '/');
+            } elseif (isset($_SERVER['HTTP_HOST'])) {
+                $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 
+                           (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443) || 
+                           (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+                $protocol = $isHttps ? 'https://' : 'http://';
+                $host = $_SERVER['HTTP_HOST'];
+                
+                $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
+                $baseDir = dirname($scriptName);
+                $baseDir = preg_replace('#/public$#', '', $baseDir);
+                $baseDir = ($baseDir === '/' || $baseDir === '\\' || $baseDir === '.') ? '' : rtrim($baseDir, '/');
+                
+                $resolvedBaseUrl = $protocol . $host . $baseDir;
+            } else {
+                $resolvedBaseUrl = rtrim($configured ?: 'http://localhost/bbacademy', '/');
+            }
+        }
         $path = ltrim($path, '/');
-        return $path === '' ? $baseUrl : "{$baseUrl}/{$path}";
+        return $path === '' ? $resolvedBaseUrl : "{$resolvedBaseUrl}/{$path}";
     }
 }
 
