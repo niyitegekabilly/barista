@@ -121,4 +121,68 @@ class CheckoutController extends Controller {
             'order' => $order
         ]);
     }
+
+    /**
+     * Public Membership Plan Checkout Page.
+     */
+    public function showMembership(Request $request, string $slug): void {
+        $user = auth();
+        if (!$user) {
+            $this->flash('warning', 'Please sign in or register an account to subscribe.');
+            $this->redirect('login?redirect=' . urlencode('checkout/membership/' . $slug));
+            return;
+        }
+
+        $plan = \App\Models\MembershipPlan::findBySlug($slug);
+        if (!$plan || empty($plan['is_active'])) {
+            $this->abort(404);
+            return;
+        }
+
+        $gateways = PaymentGatewayManager::getAvailableGateways();
+
+        $this->render('public/checkout/membership', [
+            'pageTitle' => 'Subscribe — ' . $plan['name'],
+            'plan' => $plan,
+            'user' => $user,
+            'gateways' => $gateways
+        ]);
+    }
+
+    /**
+     * Process Membership Subscription Order.
+     */
+    public function processMembership(Request $request): void {
+        $user = auth();
+        if (!$user) {
+            $this->redirect('login');
+            return;
+        }
+
+        $planId = (int)$request->input('plan_id');
+        $couponCode = $request->input('coupon_code');
+        $paymentMethod = $request->input('payment_method', 'momo');
+
+        $billingData = [
+            'name'           => $request->input('billing_name', $user['name']),
+            'email'          => $request->input('billing_email', $user['email']),
+            'phone'          => $request->input('billing_phone', ''),
+            'address'        => $request->input('billing_address', ''),
+            'customer_notes' => $request->input('customer_notes', '')
+        ];
+
+        $res = OrderService::createMembershipOrder((int)$user['id'], $planId, $billingData, $couponCode, $paymentMethod);
+
+        if (!$res['success']) {
+            $this->flash('danger', $res['message']);
+            $this->redirect('pricing');
+            return;
+        }
+
+        if ($request->isAjax()) {
+            Response::json($res);
+        }
+
+        $this->redirect($res['redirect_url']);
+    }
 }

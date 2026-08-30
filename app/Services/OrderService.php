@@ -167,6 +167,138 @@ class OrderService {
     }
 
     /**
+     * Create a recurring membership plan purchase order.
+     */
+    public static function createMembershipOrder(
+        int $userId,
+        int $planId,
+        array $billingData,
+        ?string $couponCode = null,
+        string $paymentMethod = 'momo'
+    ): array {
+        $plan = \App\Models\MembershipPlan::findWithRelations($planId);
+        if (!$plan || (int)$plan['is_active'] === 0) {
+            return ['success' => false, 'message' => 'Selected membership plan is not available.'];
+        }
+
+        $planPrice = (float)$plan['price'];
+        $currency = $plan['currency'] ?? 'RWF';
+        $discountAmount = 0.00;
+        $couponId = null;
+
+        // Apply Coupon if provided
+        if (!empty($couponCode)) {
+            $couponResult = CouponService::validateCoupon($couponCode, $planPrice, null, $userId);
+            if ($couponResult['valid']) {
+                $discountAmount = (float)$couponResult['discount_amount'];
+                $couponId = (int)$couponResult['coupon']['id'];
+            }
+        }
+
+        $finalTotal = max(0.00, $planPrice - $discountAmount);
+        $isFree = ($finalTotal === 0.00);
+
+        // 1. Insert Order
+        $orderNumber = Order::generateOrderNumber();
+        $orderId = Database::insert('orders', [
+            'order_number'    => $orderNumber,
+            'user_id'         => $userId,
+            'subtotal_amount' => $planPrice,
+            'discount_amount' => $discountAmount,
+            'tax_amount'      => 0.00,
+            'fee_amount'      => 0.00,
+            'total_amount'    => $planPrice,
+            'final_amount'    => $finalTotal,
+            'currency'        => $currency,
+            'status'          => $isFree ? 'completed' : 'pending',
+            'payment_status'  => $isFree ? 'paid' : 'unpaid',
+            'coupon_id'       => $couponId,
+            'billing_name'    => trim($billingData['name'] ?? ''),
+            'billing_email'   => trim($billingData['email'] ?? ''),
+            'billing_phone'   => trim($billingData['phone'] ?? ''),
+            'billing_address' => trim($billingData['address'] ?? ''),
+            'payment_method'  => $paymentMethod,
+            'customer_notes'  => $billingData['customer_notes'] ?? null,
+            'ip_address'      => $_SERVER['REMOTE_ADDR'] ?? null,
+            'created_at'      => date('Y-m-d H:i:s'),
+            'updated_at'      => date('Y-m-d H:i:s')
+        ]);
+
+        // 2. Insert Order Item
+        Database::insert('order_items', [
+            'order_id'        => $orderId,
+            'item_type'       => 'membership',
+            'item_id'         => $planId,
+            'item_title'      => $plan['name'] . ' (' . ucfirst($plan['billing_interval']) . ')',
+            'unit_price'      => $planPrice,
+            'price'           => $planPrice,
+            'discount_amount' => $discountAmount,
+            'tax_amount'      => 0.00,
+            'total_amount'    => $finalTotal,
+            'created_at'      => date('Y-m-d H:i:s')
+        ]);
+
+        $order = Order::findWithRelations($orderId);
+
+        // 3. If Free Membership, complete immediately
+        if ($isFree) {
+            $paymentId = Database::insert('payments', [
+                'order_id'              => $orderId,
+                'user_id'               => $userId,
+                'payment_method'        => 'free',
+                'gateway'               => 'free',
+                'transaction_reference' => 'FREE-SUB-' . date('YmdHis') . '-' . strtoupper(bin2hex(random_bytes(2))),
+                'amount'                => 0.00,
+                'currency'              => $currency,
+                'status'                => 'successful',
+                'verified_at'           => date('Y-m-d H:i:s'),
+                'created_at'            => date('Y-m-d H:i:s'),
+                'updated_at'            => date('Y-m-d H:i:s')
+            ]);
+
+            static::completeOrder($orderId, $paymentId, 'FREE-MEMBERSHIP');
+
+            return [
+                'success'      => true,
+                'order'        => $order,
+                'redirect_url' => url('checkout/success/' . $orderNumber),
+                'message'      => 'Membership activated successfully!'
+            ];
+        }
+
+        // 4. Initiate with Gateway
+        $gateway = PaymentGatewayManager::get($paymentMethod) ?: PaymentGatewayManager::get('sandbox');
+        $initiation = $gateway->initiatePayment($order, $billingData);
+
+        $paymentId = Database::insert('payments', [
+            'order_id'              => $orderId,
+            'user_id'               => $userId,
+            'payment_method'        => $paymentMethod,
+            'gateway'               => $gateway->getIdentifier(),
+            'transaction_reference' => $initiation['transaction_reference'],
+            'amount'                => $finalTotal,
+            'currency'              => $currency,
+            'status'                => 'pending',
+            'provider_response'     => json_encode($initiation['provider_data'] ?? []),
+            'created_at'            => date('Y-m-d H:i:s'),
+            'updated_at'            => date('Y-m-d H:i:s')
+        ]);
+
+        if ($gateway->getIdentifier() === 'sandbox') {
+            static::completeOrder($orderId, $paymentId, 'SANDBOX-AUTO-' . date('YmdHis'));
+        }
+
+        return [
+            'success'               => true,
+            'order'                 => $order,
+            'payment_id'            => $paymentId,
+            'transaction_reference' => $initiation['transaction_reference'],
+            'redirect_url'          => $initiation['redirect_url'] ?? url('checkout/success/' . $orderNumber),
+            'message'               => $initiation['message'] ?? 'Payment initiated.'
+        ];
+    }
+
+    /**
      * Complete an order atomically, verify payment, grant enrollment, and emit invoices/receipts.
      */
     public static function completeOrder(int $orderId, int $paymentId, ?string $gatewayTxId = null, array $rawResponse = []): bool {
@@ -232,6 +364,14 @@ class OrderService {
                         'updated_at'       => date('Y-m-d H:i:s')
                     ]);
                 }
+            } elseif ($item['item_type'] === 'membership') {
+                $planId = (int)$item['item_id'];
+                MembershipService::createSubscriptionFromOrder(
+                    $orderId,
+                    (int)$order['user_id'],
+                    $planId,
+                    $payment['payment_method'] ?? 'momo'
+                );
             }
         }
 

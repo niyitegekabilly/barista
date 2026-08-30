@@ -175,4 +175,64 @@ class StudentController extends Controller
 
         $this->render('student/wishlist', compact('courses'), 'dashboard');
     }
+
+    /**
+     * Student Self-Service Membership Portal.
+     */
+    public function subscription(): void
+    {
+        $userId = auth()['id'];
+
+        $subscription = \App\Core\Database::fetchOne(
+            "SELECT m.*, p.name as plan_name, p.slug as plan_slug, p.price as plan_price, p.billing_interval,
+                    p.course_access_type, p.has_certificate_access, p.has_live_workshops
+             FROM memberships m
+             JOIN membership_plans p ON m.plan_id = p.id
+             WHERE m.user_id = :uid
+             ORDER BY m.created_at DESC
+             LIMIT 1",
+            ['uid' => $userId]
+        );
+
+        if ($subscription) {
+            $subscription['days_remaining'] = \App\Models\Membership::calculateDaysRemaining($subscription['end_date']);
+            $subscription['renewals'] = \App\Core\Database::fetchAll(
+                "SELECT * FROM membership_renewals WHERE membership_id = :id ORDER BY created_at DESC",
+                ['id' => $subscription['id']]
+            );
+        }
+
+        $availablePlans = \App\Core\Database::fetchAll(
+            "SELECT * FROM membership_plans WHERE is_active = 1 AND status = 'active' ORDER BY sort_order ASC, price ASC"
+        );
+
+        $this->render('student/subscription', [
+            'pageTitle' => 'My Membership & Subscription',
+            'subscription' => $subscription,
+            'availablePlans' => $availablePlans
+        ], 'dashboard');
+    }
+
+    /**
+     * Student Self-Service Cancel Auto-Renew.
+     */
+    public function cancelSubscription(): void
+    {
+        $userId = auth()['id'];
+        $reason = trim($this->request->input('reason', 'Cancelled by student'));
+
+        $sub = \App\Core\Database::fetchOne(
+            "SELECT id FROM memberships WHERE user_id = :uid AND status IN ('active', 'trialing', 'grace_period') ORDER BY id DESC LIMIT 1",
+            ['uid' => $userId]
+        );
+
+        if ($sub) {
+            \App\Services\MembershipService::cancelSubscription((int)$sub['id'], $reason, false, $userId);
+            $this->flash('success', 'Auto-renew has been disabled. You will continue to have access until your current billing period ends.');
+        } else {
+            $this->flash('warning', 'No active subscription found.');
+        }
+
+        $this->redirect('/student/subscription');
+    }
 }

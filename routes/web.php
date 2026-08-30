@@ -56,11 +56,13 @@ $router->get('/logout',              [AuthController::class, 'logout']);
 $router->post('/logout',             [AuthController::class, 'logout']);
 
 // ─── Checkout ─────────────────────────────────────────────────────────────────
-$router->get('/checkout/{slug}',       [CheckoutController::class, 'show'],         ['auth']);
-$router->get('/checkout',               [CheckoutController::class, 'showMembership'], ['auth']);
-$router->post('/checkout/coupon',      [CheckoutController::class, 'applyCoupon'],  ['auth', 'csrf']);
-$router->post('/checkout/initiate',    [CheckoutController::class, 'initiate'],     ['auth', 'csrf']);
-$router->post('/payment/callback',     [CheckoutController::class, 'callback']);
+$router->get('/checkout/membership/{slug}',  [CheckoutController::class, 'showMembership'], ['auth']);
+$router->post('/checkout/membership/process', [CheckoutController::class, 'processMembership'], ['auth', 'csrf']);
+$router->get('/checkout/{slug}',              [CheckoutController::class, 'show'],           ['auth']);
+$router->post('/checkout/process',            [CheckoutController::class, 'process'],        ['auth', 'csrf']);
+$router->post('/checkout/coupon',             [CheckoutController::class, 'validateCoupon'], ['auth', 'csrf']);
+$router->get('/checkout/success/{orderNumber}', [CheckoutController::class, 'success'],     ['auth']);
+$router->get('/checkout/failed/{orderNumber}',  [CheckoutController::class, 'failed'],      ['auth']);
 
 // ─── Student Dashboard ────────────────────────────────────────────────────────
 $router->get('/student/dashboard',                          [StudentController::class, 'dashboard'],        ['auth', 'role:student,instructor,admin']);
@@ -70,6 +72,8 @@ $router->get('/student/certificates/{code}',                [StudentController::
 $router->get('/student/profile',                            [StudentController::class, 'profile'],          ['auth']);
 $router->post('/student/profile/update',                    [StudentController::class, 'updateProfile'],    ['auth', 'csrf']);
 $router->get('/student/wishlist',                           [StudentController::class, 'wishlist'],         ['auth']);
+$router->get('/student/subscription',                       [StudentController::class, 'subscription'],     ['auth']);
+$router->post('/student/subscription/cancel',               [StudentController::class, 'cancelSubscription'], ['auth', 'csrf']);
 
 // Classroom
 $router->get('/student/classroom/{courseSlug}',             [ClassroomController::class, 'show'],           ['auth']);
@@ -228,6 +232,22 @@ $router->post('/admin/campaigns/store',               [\App\Controllers\AdminCam
 $router->get('/admin/campaigns/{id}',                 [\App\Controllers\AdminCampaignController::class, 'show'],                ['auth', 'role:admin,super_admin']);
 $router->post('/admin/campaigns/{id}/update',          [\App\Controllers\AdminCampaignController::class, 'update'],              ['auth', 'role:admin,super_admin', 'csrf']);
 $router->match(['POST', 'DELETE'], '/admin/campaigns/{id}/delete', [\App\Controllers\AdminCampaignController::class, 'delete'], ['auth', 'role:admin,super_admin', 'csrf']);
+
+// Memberships & Subscriptions Hub
+$router->get('/admin/memberships',                    [\App\Controllers\AdminMembershipController::class, 'subscriptions'],     ['auth', 'role:admin,super_admin']);
+$router->get('/admin/memberships/dashboard',          [\App\Controllers\AdminMembershipController::class, 'dashboard'],         ['auth', 'role:admin,super_admin']);
+$router->get('/admin/memberships/export',             [\App\Controllers\AdminMembershipController::class, 'exportSubscriptions'], ['auth', 'role:admin,super_admin']);
+$router->get('/admin/memberships/{id}',               [\App\Controllers\AdminMembershipController::class, 'showSubscription'],  ['auth', 'role:admin,super_admin']);
+$router->post('/admin/memberships/{id}/extend',       [\App\Controllers\AdminMembershipController::class, 'extend'],            ['auth', 'role:admin,super_admin', 'csrf']);
+$router->post('/admin/memberships/{id}/cancel',       [\App\Controllers\AdminMembershipController::class, 'cancel'],            ['auth', 'role:admin,super_admin', 'csrf']);
+
+// Membership Plans Management
+$router->get('/admin/membership-plans',               [\App\Controllers\AdminMembershipController::class, 'plans'],             ['auth', 'role:admin,super_admin']);
+$router->get('/admin/membership-plans/create',        [\App\Controllers\AdminMembershipController::class, 'createPlan'],        ['auth', 'role:admin,super_admin']);
+$router->post('/admin/membership-plans/store',        [\App\Controllers\AdminMembershipController::class, 'storePlan'],         ['auth', 'role:admin,super_admin', 'csrf']);
+$router->get('/admin/membership-plans/{id}/edit',     [\App\Controllers\AdminMembershipController::class, 'editPlan'],          ['auth', 'role:admin,super_admin']);
+$router->post('/admin/membership-plans/{id}/update',  [\App\Controllers\AdminMembershipController::class, 'updatePlan'],        ['auth', 'role:admin,super_admin', 'csrf']);
+$router->match(['POST', 'DELETE'], '/admin/membership-plans/{id}/delete', [\App\Controllers\AdminMembershipController::class, 'deletePlan'], ['auth', 'role:admin,super_admin', 'csrf']);
 
 // Blog
 $router->get('/admin/blog',                  [AdminController::class, 'blog'],             ['auth', 'role:admin']);

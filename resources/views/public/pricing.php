@@ -44,7 +44,7 @@
                         <?php if ((float)$plan['price'] === 0.0): ?>
                             <a href="<?= url('register') ?>" class="btn btn-outline-primary btn-lg w-100 fw-bold">Join Free Community</a>
                         <?php else: ?>
-                            <a href="<?= url('checkout?type=membership&id=' . e($plan['id'])) ?>" class="btn <?= $isPopular ? 'btn-accent' : 'btn-primary' ?> btn-lg w-100 fw-bold">
+                            <a href="<?= url('checkout/membership/' . e($plan['slug'])) ?>" class="btn <?= $isPopular ? 'btn-accent' : 'btn-primary' ?> btn-lg w-100 fw-bold">
                                 Subscribe with Momo / Card
                             </a>
                         <?php endif; ?>
