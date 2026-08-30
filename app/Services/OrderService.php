@@ -403,6 +403,13 @@ class OrderService {
             url('student/classroom/' . ($order['items'][0]['course_slug'] ?? ''))
         );
 
+        $studentEmail = $order['billing_email'] ?? Database::fetchValue("SELECT email FROM users WHERE id = :uid", ['uid' => $order['user_id']]);
+        if (!empty($studentEmail) && !empty($order['items'][0]['course_title'])) {
+            $studentName = $order['billing_name'] ?? Database::fetchValue("SELECT name FROM users WHERE id = :uid", ['uid' => $order['user_id']]) ?: 'Student';
+            $classroomUrl = url('student/classroom/' . ($order['items'][0]['course_slug'] ?? ''));
+            MailService::sendEnrollmentConfirmation($studentEmail, (string)$studentName, $order['items'][0]['course_title'], $classroomUrl);
+        }
+
         AuditLog::log('order_completed', 'order', $orderId, [
             'order_number' => $order['order_number'],
             'amount' => $payment['amount'],

@@ -50,12 +50,17 @@ class InvitationService {
             'invited_by' => $invitedBy
         ]);
 
+        // Send luxury branded invitation email
+        $roleName = Database::fetchValue("SELECT name FROM roles WHERE id = :rid", ['rid' => $roleId]) ?: 'Student';
+        $emailResult = MailService::sendInvitation($email, $name, $inviteUrl, (string)$roleName);
+
         return [
             'success' => true,
             'invitation_id' => $invitationId,
             'token' => $token,
             'invite_url' => $inviteUrl,
-            'message' => 'Invitation created successfully.'
+            'email_sent' => $emailResult['success'] ?? false,
+            'message' => 'Invitation created and email sent successfully.'
         ];
     }
 

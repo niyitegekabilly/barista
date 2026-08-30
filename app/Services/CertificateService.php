@@ -83,6 +83,12 @@ class CertificateService {
             url('student/certificates/' . $certNumber)
         );
 
+        // Send Email Notice
+        $studentEmail = $enrollment['user_email'] ?? Database::fetchValue("SELECT email FROM users WHERE id = :uid", ['uid' => $enrollment['user_id']]);
+        if (!empty($studentEmail)) {
+            MailService::sendCertificateIssued($studentEmail, $enrollment['user_name'], $enrollment['course_title'], $certNumber, url('certificate/verify/' . $certNumber));
+        }
+
         $cert = Database::fetchOne("SELECT * FROM certificates WHERE id = :id", ['id' => $certId]);
 
         return [

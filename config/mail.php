@@ -4,12 +4,12 @@ return [
     'default' => env('MAIL_MAILER', 'smtp'),
     'mailers' => [
         'smtp' => [
-            'host' => env('MAIL_HOST', 'sandbox.smtp.mailtrap.io'),
-            'port' => env('MAIL_PORT', 2525),
-            'encryption' => env('MAIL_ENCRYPTION', 'tls'),
-            'username' => env('MAIL_USERNAME', ''),
-            'password' => env('MAIL_PASSWORD', ''),
-            'timeout' => null,
+            'host' => env('MAIL_HOST', 'mail.beyondbarista.rw'),
+            'port' => (int)env('MAIL_PORT', 465),
+            'encryption' => env('MAIL_ENCRYPTION', 'ssl'),
+            'username' => env('MAIL_USERNAME', 'info@beyondbarista.rw'),
+            'password' => env('MAIL_PASSWORD', 'Amakuru@2026'),
+            'timeout' => (int)(env('MAIL_TIMEOUT') ?: 15),
         ],
     ],
     'from' => [

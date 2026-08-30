@@ -27,6 +27,7 @@ require BASE_PATH . '/app/Models/Refund.php';
 require BASE_PATH . '/app/Models/FinancialTransaction.php';
 require BASE_PATH . '/app/Models/AuditLog.php';
 require BASE_PATH . '/app/Models/Notification.php';
+require BASE_PATH . '/app/Services/MailService.php';
 require BASE_PATH . '/app/Services/VideoService.php';
 require BASE_PATH . '/app/Services/ClassroomService.php';
 require BASE_PATH . '/app/Services/CertificateService.php';
