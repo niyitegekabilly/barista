@@ -25,14 +25,14 @@ class HomeController extends Controller
              LIMIT 6"
         );
 
-        $categories = (new Category())->withCourseCount();
+        $categories = Category::getActiveWithCounts();
 
         // Fetch testimonials
         $testimonials = $this->db()->fetchAll(
             "SELECT * FROM testimonials WHERE is_active = 1 ORDER BY sort_order ASC, created_at DESC LIMIT 6"
         );
 
-        $latestPosts = (new BlogPost())->where('is_published', 1)->orderBy('published_at', 'DESC')->limit(3)->get();
+        $latestPosts = BlogPost::getPublished(3);
         $stats = [
             'students'     => $this->db()->fetchOne("SELECT COUNT(*) cnt FROM users WHERE role_id=(SELECT id FROM roles WHERE slug='student')")['cnt'] ?? 0,
             'courses'      => $this->db()->fetchOne("SELECT COUNT(*) cnt FROM courses WHERE is_published=1")['cnt'] ?? 0,
@@ -68,7 +68,7 @@ class HomeController extends Controller
 
     public function pricing(): void
     {
-        $plans = (new \App\Models\MembershipPlan())->where('is_active', 1)->orderBy('price', 'ASC')->get();
+        $plans = \App\Models\MembershipPlan::getActive();
         $this->render('public/pricing', compact('plans'));
     }
 }

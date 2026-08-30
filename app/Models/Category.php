@@ -25,6 +25,13 @@ class Category extends Model {
     }
 
     /**
+     * Alias for getActiveWithCounts to support backward compatibility.
+     */
+    public function withCourseCount(): array {
+        return static::getActiveWithCounts();
+    }
+
+    /**
      * Get single category with parent and subcategories.
      */
     public static function findWithDetails(int $id): ?array {

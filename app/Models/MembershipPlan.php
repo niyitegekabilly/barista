@@ -8,6 +8,10 @@ use App\Core\Database;
 class MembershipPlan extends Model {
     protected static string $table = 'membership_plans';
 
+    public static function getActive(): array {
+        return Database::fetchAll("SELECT * FROM membership_plans WHERE is_active = 1 AND status != 'archived' ORDER BY sort_order ASC, price ASC");
+    }
+
     public static function findBySlug(string $slug): ?array {
         return Database::fetchOne("SELECT * FROM membership_plans WHERE slug = :s LIMIT 1", ['s' => trim($slug)]);
     }
