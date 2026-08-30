@@ -58,7 +58,7 @@ class InstructorController extends Controller
 
     public function createCourse(): void
     {
-        $categories = (new Category())->orderBy('name', 'ASC')->get();
+        $categories = \App\Services\CategoryService::getFlatTreeList();
         $this->render('instructor/courses/create', compact('categories'), 'dashboard');
     }
 
@@ -67,6 +67,7 @@ class InstructorController extends Controller
         $instructorId = auth()['id'];
         $price = (float)$this->request->input('price', 0);
         $title = trim($this->request->input('title', ''));
+        $categoryId = (int)$this->request->input('category_id');
 
         $reqLines = array_filter(array_map('trim', explode("\n", (string)$this->request->input('requirements', ''))));
         $outLines = array_filter(array_map('trim', explode("\n", (string)$this->request->input('what_you_learn', ''))));
@@ -75,7 +76,7 @@ class InstructorController extends Controller
             'title'                => $title,
             'short_description'   => $this->request->input('short_description'),
             'description'         => $this->request->input('description'),
-            'category_id'         => (int)$this->request->input('category_id'),
+            'category_id'         => $categoryId,
             'level'               => $this->request->input('level', 'beginner'),
             'price'               => $price,
             'discount_price'      => $this->request->input('discount_price') ? (float)$this->request->input('discount_price') : null,
@@ -105,6 +106,16 @@ class InstructorController extends Controller
             'user_id'   => $instructorId
         ]);
 
+        // Insert primary category into course_categories
+        if ($categoryId > 0) {
+            $this->db()->insert('course_categories', [
+                'course_id' => $courseId,
+                'category_id' => $categoryId,
+                'is_primary' => 1,
+                'created_at' => date('Y-m-d H:i:s')
+            ]);
+        }
+
         $this->flash('success', 'Course created! Now build your curriculum sections and video lessons.');
         $this->redirect('/instructor/courses/' . $courseId . '/curriculum');
     }
@@ -122,7 +133,7 @@ class InstructorController extends Controller
             return;
         }
 
-        $categories = (new Category())->orderBy('name', 'ASC')->get();
+        $categories = \App\Services\CategoryService::getFlatTreeList();
         $this->render('instructor/courses/edit', compact('course', 'categories'), 'dashboard');
     }
 
@@ -146,7 +157,8 @@ class InstructorController extends Controller
             'price'             => $price,
             'discount_price'    => $this->request->input('discount_price') !== '' && $this->request->input('discount_price') !== null ? (float)$this->request->input('discount_price') : null,
             'is_free'           => $price <= 0 ? 1 : 0,
-            'is_published'      => (int)$this->request->input('is_published', 1),
+            // Publishing status is controlled exclusively by CourseApprovalService
+            // (submit-for-review -> approval -> publish), never by direct POST input.
             'duration_hours'    => (float)$this->request->input('duration_hours', 0),
             'requirements'      => json_encode(array_values($reqLines)),
             'learning_outcomes' => json_encode(array_values($outLines)),
@@ -159,8 +171,40 @@ class InstructorController extends Controller
         }
 
         $this->db()->update('courses', $data, ['id' => $id]);
+
+        // Sync primary category in course_categories pivot
+        if (!empty($data['category_id'])) {
+            $this->db()->query("DELETE FROM course_categories WHERE course_id = ? AND is_primary = 1", [$id]);
+            $this->db()->insert('course_categories', [
+                'course_id'   => $id,
+                'category_id' => $data['category_id'],
+                'is_primary'  => 1,
+                'created_at'  => date('Y-m-d H:i:s')
+            ]);
+        }
+
         $this->flash('success', 'Course updated successfully.');
         $this->redirect('/instructor/courses/' . $id . '/edit');
+    }
+
+    /**
+     * Submit a draft (or changes-requested) course into the approval queue.
+     */
+    public function submitForReview(\App\Core\Request $request, int $id): void
+    {
+        if (!$this->canManageCourse($id)) {
+            $this->abort(403);
+            return;
+        }
+
+        try {
+            (new \App\Services\CourseApprovalService())->submitForReview($id, (int)auth_id());
+            $this->flash('success', 'Course submitted for review.');
+        } catch (\Throwable $e) {
+            $this->flash('danger', $e->getMessage());
+        }
+
+        $this->redirect('/instructor/courses/' . $id . '/curriculum');
     }
 
     /**
@@ -208,7 +252,16 @@ class InstructorController extends Controller
 
         $providers = \App\Services\VideoService::getProviders();
 
-        $this->render('instructor/courses/curriculum', compact('course', 'modules', 'providers'), 'dashboard');
+        $approvalHistory = $this->db()->query(
+            "SELECT h.*, u.name as performed_by_name
+             FROM course_approval_history h
+             JOIN users u ON h.performed_by = u.id
+             WHERE h.course_id = ?
+             ORDER BY h.created_at DESC",
+            [$id]
+        )->fetchAll();
+
+        $this->render('instructor/courses/curriculum', compact('course', 'modules', 'providers', 'approvalHistory'), 'dashboard');
     }
 
     public function storeModule(\App\Core\Request $request, int $courseId): void

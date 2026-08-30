@@ -44,6 +44,9 @@ class AuthController extends Controller
                 case 'instructor':
                     $this->redirect('/instructor/dashboard');
                     break;
+                case 'reviewer':
+                    $this->redirect('/admin/courses');
+                    break;
                 default:
                     $this->redirect('/student/dashboard');
             }

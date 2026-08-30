@@ -66,6 +66,50 @@ class CourseController extends Controller
         $this->render('public/courses/index', compact('courses', 'categories', 'filter', 'search', 'level', 'sort', 'totalCount', 'filters'));
     }
 
+    /**
+     * Public Category Landing Page with subcategories and filtered courses.
+     */
+    public function category(\App\Core\Request $request, string $slug): void
+    {
+        $category = Category::findBySlug($slug);
+        if (!$category) {
+            $this->abort(404);
+            return;
+        }
+
+        $categoryId = (int)$category['id'];
+        $subcategories = Category::getChildren($categoryId);
+        $breadcrumbs = Category::getBreadcrumbs($categoryId);
+
+        // Include courses from this category and all its descendants
+        $allCatIds = array_merge([$categoryId], Category::getDescendantIds($categoryId));
+        $inClause = implode(',', $allCatIds);
+
+        $courses = $this->db()->query(
+            "SELECT c.*, cat.name category_name, cat.slug category_slug, u.name instructor_name,
+                    COUNT(DISTINCT e.id) as enrollment_count,
+                    COALESCE(AVG(r.rating), 0) as avg_rating
+             FROM courses c
+             JOIN course_categories cc ON c.id = cc.course_id
+             LEFT JOIN categories cat ON c.category_id = cat.id
+             LEFT JOIN users u ON c.created_by = u.id
+             LEFT JOIN enrollments e ON e.course_id = c.id
+             LEFT JOIN reviews r ON r.course_id = c.id
+             WHERE cc.category_id IN ({$inClause}) AND c.is_published = 1
+             GROUP BY c.id
+             ORDER BY c.is_featured DESC, enrollment_count DESC"
+        )->fetchAll();
+
+        $this->render('public/courses/category', [
+            'pageTitle' => ($category['seo_title'] ?: $category['name']) . ' Courses — Beyond Barista Academy',
+            'category' => $category,
+            'subcategories' => $subcategories,
+            'breadcrumbs' => $breadcrumbs,
+            'courses' => $courses,
+            'totalCourses' => count($courses)
+        ]);
+    }
+
     public function show(\App\Core\Request $request, string $slug): void
     {
         $course = $this->db()->fetchOne(

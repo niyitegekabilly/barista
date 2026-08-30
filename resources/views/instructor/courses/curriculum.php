@@ -9,15 +9,53 @@
         </nav>
         <h2 class="font-heading fw-bold mb-0">Curriculum & Video Lessons</h2>
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex align-items-center gap-2">
+        <?php
+        $statusBadges = [
+            'draft' => 'bg-secondary', 'pending_review' => 'bg-warning-subtle text-warning border border-warning',
+            'under_review' => 'bg-info-subtle text-info border border-info', 'changes_requested' => 'bg-warning text-dark',
+            'approved' => 'bg-success-subtle text-success border border-success', 'scheduled' => 'bg-primary-subtle text-primary border border-primary',
+            'published' => 'bg-success', 'unpublished' => 'bg-secondary-subtle text-secondary border',
+            'archived' => 'bg-dark-subtle text-dark border', 'rejected' => 'bg-danger-subtle text-danger border border-danger',
+        ];
+        $courseStatus = $course['status'] ?? 'draft';
+        ?>
+        <span class="badge <?= $statusBadges[$courseStatus] ?? 'bg-secondary' ?> text-capitalize px-3 py-2"><?= e(str_replace('_', ' ', $courseStatus)) ?></span>
         <a href="<?= url('courses/' . e($course['slug'])) ?>" target="_blank" class="btn btn-outline-secondary btn-sm">
             <i class="bi bi-eye me-1"></i> Preview Course Page
         </a>
         <a href="<?= url('instructor/courses/' . e($course['id']) . '/edit') ?>" class="btn btn-primary btn-sm fw-bold">
             <i class="bi bi-pencil me-1"></i> Edit Details
         </a>
+        <?php if (in_array($courseStatus, ['draft', 'changes_requested'], true)): ?>
+            <form action="<?= url('instructor/courses/' . e($course['id']) . '/submit-review') ?>" method="POST" onsubmit="return confirm('Submit this course for admin review?')">
+                <?= csrf_field() ?>
+                <button type="submit" class="btn btn-success btn-sm fw-bold"><i class="bi bi-send-check me-1"></i> Submit for Review</button>
+            </form>
+        <?php endif; ?>
     </div>
 </div>
+
+<?php if (!empty($course['rejection_reason']) && in_array($courseStatus, ['changes_requested', 'rejected'], true)): ?>
+    <div class="alert alert-warning border-0 rounded-4 shadow-sm mb-4">
+        <strong><i class="bi bi-exclamation-triangle-fill me-1"></i> <?= $courseStatus === 'rejected' ? 'Rejection reason' : 'Changes requested by reviewer' ?>:</strong>
+        <?= e($course['rejection_reason']) ?>
+    </div>
+<?php endif; ?>
+
+<?php if (!empty($approvalHistory)): ?>
+    <div class="card border-0 shadow-sm rounded-4 p-3 mb-4">
+        <h6 class="font-heading fw-bold mb-2 small text-uppercase text-muted">Review History</h6>
+        <ul class="list-unstyled mb-0 small">
+            <?php foreach ($approvalHistory as $h): ?>
+                <li class="py-1 border-bottom d-flex justify-content-between">
+                    <span class="text-capitalize"><?= e(str_replace('_', ' ', $h['action'])) ?> by <?= e($h['performed_by_name']) ?></span>
+                    <span class="text-muted"><?= date('M d, Y H:i', strtotime($h['created_at'])) ?></span>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+<?php endif; ?>
 
 <div class="row g-4">
     <!-- Main Curriculum Section -->

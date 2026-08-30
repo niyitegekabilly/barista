@@ -124,6 +124,9 @@ class Router {
                 if ($name === 'role') {
                     return new \App\Middleware\RoleMiddleware(explode(',', $param));
                 }
+                if ($name === 'permission') {
+                    return new \App\Middleware\PermissionMiddleware($param);
+                }
             }
             if ($middleware === 'auth') {
                 return new \App\Middleware\AuthMiddleware();

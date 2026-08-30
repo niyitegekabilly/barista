@@ -51,7 +51,7 @@ $outText = is_array($outArray) ? implode("\n", $outArray) : ($course['learning_o
                         <select name="category_id" class="form-select">
                             <?php foreach ($categories as $cat): ?>
                                 <option value="<?= $cat['id'] ?>" <?= $cat['id'] == $course['category_id'] ? 'selected' : '' ?>>
-                                    <?= e($cat['name']) ?>
+                                    <?= e($cat['indented_name'] ?? $cat['name']) ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>

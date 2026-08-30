@@ -96,8 +96,11 @@
                     <a class="sidebar-nav-item <?= str_contains($_SERVER['REQUEST_URI'], '/admin/courses') ? 'active' : '' ?>" href="<?= url('admin/courses') ?>">
                         <i class="bi bi-journal-code"></i> <span>Courses & Approval</span>
                     </a>
-                    <a class="sidebar-nav-item <?= str_contains($_SERVER['REQUEST_URI'], '/admin/categories') ? 'active' : '' ?>" href="<?= url('admin/categories') ?>">
-                        <i class="bi bi-tags-fill"></i> <span>Training Categories</span>
+                    <a class="sidebar-nav-item <?= (str_contains($_SERVER['REQUEST_URI'], '/admin/categories') || str_contains($_SERVER['REQUEST_URI'], '/admin/category')) ? 'active' : '' ?>" href="<?= url('admin/categories') ?>">
+                        <i class="bi bi-diagram-3-fill"></i> <span>Categories & Hierarchy</span>
+                    </a>
+                    <a class="sidebar-nav-item <?= str_contains($_SERVER['REQUEST_URI'], '/admin/tags') ? 'active' : '' ?>" href="<?= url('admin/tags') ?>">
+                        <i class="bi bi-tags-fill"></i> <span>Taxonomy Tags</span>
                     </a>
                     <a class="sidebar-nav-item <?= str_contains($_SERVER['REQUEST_URI'], '/admin/orders') ? 'active' : '' ?>" href="<?= url('admin/orders') ?>">
                         <i class="bi bi-receipt"></i> <span>Finance & Orders</span>
@@ -139,6 +142,11 @@
                     </a>
                     <a class="sidebar-nav-item <?= str_contains($currentUri, '/instructor/reviews') ? 'active' : '' ?>" href="<?= url('instructor/reviews') ?>">
                         <i class="bi bi-star-fill text-warning"></i> <span>Student Reviews</span>
+                    </a>
+                <?php elseif ($user['role_slug'] === 'reviewer'): ?>
+                    <!-- Course Reviewer Navigation -->
+                    <a class="sidebar-nav-item <?= str_contains($currentUri, '/admin/courses') ? 'active' : '' ?>" href="<?= url('admin/courses') ?>">
+                        <i class="bi bi-clipboard-check-fill text-primary"></i> <span>Courses & Approval</span>
                     </a>
                 <?php else: ?>
                     <!-- Student Navigation -->

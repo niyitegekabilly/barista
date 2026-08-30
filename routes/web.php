@@ -25,12 +25,14 @@ $router->get('/pricing',            [HomeController::class, 'pricing']);
 $router->get('/contact',            [HomeController::class, 'contact']);
 $router->post('/contact',           [HomeController::class, 'contactSubmit'], ['csrf']);
 
-// Courses
-$router->get('/courses',               [CourseController::class, 'index']);
-$router->get('/courses/{slug}',        [CourseController::class, 'show']);
-$router->get('/course/{slug}',         [CourseController::class, 'show']);
-$router->post('/courses/enroll/{id}',  [CourseController::class, 'enroll'], ['auth', 'csrf']);
-$router->post('/course/enroll/{id}',   [CourseController::class, 'enroll'], ['auth', 'csrf']);
+// Courses & Categories
+$router->get('/courses',                       [CourseController::class, 'index']);
+$router->get('/courses/category/{slug}',        [CourseController::class, 'category']);
+$router->get('/category/{slug}',                 [CourseController::class, 'category']);
+$router->get('/courses/{slug}',                [CourseController::class, 'show']);
+$router->get('/course/{slug}',                 [CourseController::class, 'show']);
+$router->post('/courses/enroll/{id}',          [CourseController::class, 'enroll'], ['auth', 'csrf']);
+$router->post('/course/enroll/{id}',           [CourseController::class, 'enroll'], ['auth', 'csrf']);
 
 // Blog
 $router->get('/blog',               [BlogController::class, 'index']);
@@ -86,6 +88,7 @@ $router->post('/instructor/courses/store',                   [InstructorControll
 $router->get('/instructor/courses/{id}/edit',                [InstructorController::class, 'editCourse'],    ['auth', 'role:instructor,admin']);
 $router->match(['POST', 'PUT'], '/instructor/courses/{id}/update', [InstructorController::class, 'updateCourse'], ['auth', 'role:instructor,admin', 'csrf']);
 $router->get('/instructor/courses/{id}/curriculum',          [InstructorController::class, 'curriculum'],    ['auth', 'role:instructor,admin']);
+$router->post('/instructor/courses/{id}/submit-review',      [InstructorController::class, 'submitForReview'],['auth', 'role:instructor,admin', 'csrf']);
 $router->post('/instructor/courses/{courseId}/modules/store',[InstructorController::class, 'storeModule'],  ['auth', 'role:instructor,admin', 'csrf']);
 $router->match(['POST', 'DELETE'], '/instructor/modules/{moduleId}/delete', [InstructorController::class, 'deleteModule'], ['auth', 'role:instructor,admin', 'csrf']);
 $router->post('/instructor/lessons/store',                   [InstructorController::class, 'storeLesson'],   ['auth', 'role:instructor,admin', 'csrf']);
@@ -136,17 +139,44 @@ $router->get('/admin/cohorts',                       [\App\Controllers\AdminUser
 $router->post('/admin/cohorts/store',                [\App\Controllers\AdminUserController::class, 'cohortStore'],         ['auth', 'role:admin,super_admin', 'csrf']);
 $router->get('/admin/cohorts/{id}',                  [\App\Controllers\AdminUserController::class, 'cohortShow'],          ['auth', 'role:admin,super_admin']);
 
-// Courses
-$router->get('/admin/courses',               [AdminController::class, 'courses'],          ['auth', 'role:admin']);
-$router->post('/admin/courses/{id}/approve', [AdminController::class, 'approveCourse'],    ['auth', 'role:admin', 'csrf']);
-$router->post('/admin/courses/{id}/reject',  [AdminController::class, 'rejectCourse'],     ['auth', 'role:admin', 'csrf']);
-$router->post('/admin/courses/{id}/unpublish',[AdminController::class, 'unpublishCourse'], ['auth', 'role:admin', 'csrf']);
+// Courses & Approval (real lifecycle/approval workflow — AdminCourseController).
+// Gated by granular `permission:` middleware (not a fixed role list) so an
+// admin can grant/revoke these abilities per-role via /admin/roles without a
+// code change — e.g. granting `courses.publish` to Instructor really unlocks
+// the publish route for them, per the spec's "unless explicitly permitted".
+$router->get('/admin/courses',                      [\App\Controllers\AdminCourseController::class, 'index'],          ['auth', 'permission:courses.view']);
+$router->post('/admin/courses/bulk',                [\App\Controllers\AdminCourseController::class, 'bulkAction'],     ['auth', 'permission:courses.view', 'csrf']);
+$router->get('/admin/courses/{id}',                 [\App\Controllers\AdminCourseController::class, 'show'],           ['auth', 'permission:courses.view']);
+$router->post('/admin/courses/{id}/start-review',   [\App\Controllers\AdminCourseController::class, 'startReview'],    ['auth', 'permission:courses.review', 'csrf']);
+$router->post('/admin/courses/{id}/approve',        [\App\Controllers\AdminCourseController::class, 'approve'],        ['auth', 'permission:courses.review', 'csrf']);
+$router->post('/admin/courses/{id}/reject',         [\App\Controllers\AdminCourseController::class, 'reject'],         ['auth', 'permission:courses.review', 'csrf']);
+$router->post('/admin/courses/{id}/request-changes',[\App\Controllers\AdminCourseController::class, 'requestChanges'], ['auth', 'permission:courses.review', 'csrf']);
+$router->post('/admin/courses/{id}/publish',        [\App\Controllers\AdminCourseController::class, 'publish'],        ['auth', 'permission:courses.publish', 'csrf']);
+$router->post('/admin/courses/{id}/schedule',       [\App\Controllers\AdminCourseController::class, 'schedule'],       ['auth', 'permission:courses.publish', 'csrf']);
+$router->post('/admin/courses/{id}/unpublish',      [\App\Controllers\AdminCourseController::class, 'unpublish'],      ['auth', 'permission:courses.publish', 'csrf']);
+$router->post('/admin/courses/{id}/archive',        [\App\Controllers\AdminCourseController::class, 'archive'],        ['auth', 'permission:courses.archive', 'csrf']);
+$router->post('/admin/courses/{id}/restore',        [\App\Controllers\AdminCourseController::class, 'restore'],        ['auth', 'permission:courses.archive', 'csrf']);
 
-// Categories
-$router->get('/admin/categories',            [AdminController::class, 'categories'],       ['auth', 'role:admin']);
-$router->post('/admin/categories/store',     [AdminController::class, 'storeCategory'],    ['auth', 'role:admin', 'csrf']);
-$router->match(['POST', 'PUT'], '/admin/categories/{id}/update', [AdminController::class, 'updateCategory'], ['auth', 'role:admin', 'csrf']);
-$router->match(['POST', 'DELETE'], '/admin/categories/{id}/delete', [AdminController::class, 'deleteCategory'], ['auth', 'role:admin', 'csrf']);
+// Categories & Taxonomy Hub
+$router->get('/admin/categories',                     [\App\Controllers\AdminCategoryController::class, 'index'],              ['auth', 'role:admin,super_admin']);
+$router->post('/admin/categories/store',              [\App\Controllers\AdminCategoryController::class, 'store'],              ['auth', 'role:admin,super_admin', 'csrf']);
+$router->get('/admin/categories/export',              [\App\Controllers\AdminCategoryController::class, 'exportCsv'],          ['auth', 'role:admin,super_admin']);
+$router->post('/admin/categories/import/preview',     [\App\Controllers\AdminCategoryController::class, 'importCsvPreview'],   ['auth', 'role:admin,super_admin']);
+$router->post('/admin/categories/import/process',     [\App\Controllers\AdminCategoryController::class, 'importCsvProcess'],   ['auth', 'role:admin,super_admin', 'csrf']);
+$router->post('/admin/categories/bulk',               [\App\Controllers\AdminCategoryController::class, 'bulkAction'],          ['auth', 'role:admin,super_admin', 'csrf']);
+$router->get('/admin/categories/{id}',                [\App\Controllers\AdminCategoryController::class, 'show'],               ['auth', 'role:admin,super_admin']);
+$router->post('/admin/categories/{id}/update',        [\App\Controllers\AdminCategoryController::class, 'update'],             ['auth', 'role:admin,super_admin', 'csrf']);
+$router->post('/admin/categories/{id}/duplicate',     [\App\Controllers\AdminCategoryController::class, 'duplicate'],          ['auth', 'role:admin,super_admin', 'csrf']);
+$router->get('/admin/categories/{id}/delete-prompt',  [\App\Controllers\AdminCategoryController::class, 'deletePrompt'],        ['auth', 'role:admin,super_admin']);
+$router->post('/admin/categories/{id}/delete',        [\App\Controllers\AdminCategoryController::class, 'delete'],              ['auth', 'role:admin,super_admin', 'csrf']);
+$router->post('/admin/categories/{id}/reassign-course',[\App\Controllers\AdminCategoryController::class, 'reassignCourse'],   ['auth', 'role:admin,super_admin', 'csrf']);
+
+// Tags Management
+$router->get('/admin/tags',                           [\App\Controllers\AdminTagController::class, 'index'],                   ['auth', 'role:admin,super_admin']);
+$router->post('/admin/tags/store',                    [\App\Controllers\AdminTagController::class, 'store'],                   ['auth', 'role:admin,super_admin', 'csrf']);
+$router->post('/admin/tags/{id}/update',              [\App\Controllers\AdminTagController::class, 'update'],                  ['auth', 'role:admin,super_admin', 'csrf']);
+$router->post('/admin/tags/{id}/delete',              [\App\Controllers\AdminTagController::class, 'delete'],                  ['auth', 'role:admin,super_admin', 'csrf']);
+$router->get('/api/tags/search',                      [\App\Controllers\AdminTagController::class, 'apiSearch']);
 
 // Orders & Coupons
 $router->get('/admin/orders',                [AdminController::class, 'orders'],           ['auth', 'role:admin']);

@@ -59,6 +59,15 @@ class DatabaseSeeder {
                 'headline' => 'Aspiring Specialty Cafe Manager',
                 'phone' => '+250 789 987 654',
                 'bio' => 'Enthusiastic hospitality student passionate about coffee craftsmanship and beverage service.'
+            ],
+            [
+                'role_id' => 6,
+                'name' => 'Solange Ingabire',
+                'email' => 'reviewer@beyondbarista.rw',
+                'password' => password_hash('Reviewer@2026', PASSWORD_DEFAULT),
+                'headline' => 'Curriculum Quality Reviewer',
+                'phone' => '+250 788 222 333',
+                'bio' => 'Reviews submitted courses for instructional quality, accuracy, and readiness before they go live.'
             ]
         ];
 
@@ -82,6 +91,12 @@ class DatabaseSeeder {
                     'country' => 'Rwanda',
                     'city' => 'Kigali',
                     'language' => 'en'
+                ]);
+
+                self::db()->insert('user_roles', [
+                    'user_id' => $userId,
+                    'role_id' => $u['role_id'],
+                    'is_primary' => 1,
                 ]);
             }
         }

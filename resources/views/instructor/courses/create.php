@@ -31,7 +31,7 @@
                         <select name="category_id" class="form-select" required>
                             <option value="">-- Select Category --</option>
                             <?php foreach ($categories as $cat): ?>
-                                <option value="<?= $cat['id'] ?>"><?= e($cat['name']) ?></option>
+                                <option value="<?= $cat['id'] ?>"><?= e($cat['indented_name'] ?? $cat['name']) ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>

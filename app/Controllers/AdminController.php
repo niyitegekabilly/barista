@@ -150,46 +150,9 @@ class AdminController extends Controller
         $this->redirect('/admin/users');
     }
 
-    // ── Courses ────────────────────────────────────────────────────
-    public function courses(): void
-    {
-        $status = $_GET['status'] ?? '';
-        $where  = $status === 'published' ? "WHERE c.is_published = 1" : ($status === 'draft' ? "WHERE c.is_published = 0" : '');
-
-        $courses = $this->db()->query(
-            "SELECT c.*, u.name instructor_name, cat.name category_name, COUNT(DISTINCT e.id) enrollment_count
-             FROM courses c JOIN users u ON c.created_by = u.id
-             LEFT JOIN categories cat ON c.category_id = cat.id
-             LEFT JOIN enrollments e ON e.course_id = c.id
-             $where GROUP BY c.id ORDER BY c.created_at DESC",
-            $status ? ['status' => $status] : []
-        )->fetchAll();
-
-        $this->render('admin/courses/index', compact('courses'), 'dashboard');
-    }
-
-    public function approveCourse(Request $request, int $id): void
-    {
-        $this->db()->query("UPDATE courses SET is_published=1 WHERE id = ?", [$id]);
-        (new \App\Models\AuditLog())->log('approve_course', "Admin approved course ID $id");
-        $this->flash('success', 'Course approved and published.');
-        $this->redirect('/admin/courses');
-    }
-
-    public function rejectCourse(Request $request, int $id): void
-    {
-        $this->db()->query("UPDATE courses SET is_published=0 WHERE id = ?", [$id]);
-        (new \App\Models\AuditLog())->log('reject_course', "Admin rejected course ID $id");
-        $this->flash('error', 'Course rejected.');
-        $this->redirect('/admin/courses');
-    }
-
-    public function unpublishCourse(Request $request, int $id): void
-    {
-        $this->db()->query("UPDATE courses SET is_published=0 WHERE id = ?", [$id]);
-        $this->flash('success', 'Course unpublished.');
-        $this->redirect('/admin/courses');
-    }
+    // ── Courses & Approval ────────────────────────────────────────
+    // Moved to AdminCourseController (real lifecycle/approval workflow,
+    // KPI dashboard, search/filter/pagination/bulk actions) — see routes.
 
     // ── Categories ─────────────────────────────────────────────────
     public function categories(): void
