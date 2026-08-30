@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="coffeeBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3D2314"/>
+      <stop offset="50%" stop-color="#2C1810"/>
+      <stop offset="100%" stop-color="#1A0F0A"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F3E5AB"/>
+      <stop offset="30%" stop-color="#D4B483"/>
+      <stop offset="70%" stop-color="#C59B63"/>
+      <stop offset="100%" stop-color="#9A7338"/>
+    </linearGradient>
+    <linearGradient id="creamGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FAF6F0"/>
+      <stop offset="100%" stop-color="#E0C097"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Base Circle -->
+  <circle cx="256" cy="256" r="248" fill="url(#coffeeBg)" stroke="url(#goldGrad)" stroke-width="10"/>
+
+  <!-- Outer Ring -->
+  <circle cx="256" cy="256" r="230" fill="none" stroke="url(#goldGrad)" stroke-width="4" stroke-dasharray="12,6"/>
+  <circle cx="256" cy="256" r="218" fill="none" stroke="url(#goldGrad)" stroke-width="3"/>
+
+  <!-- Curved Text: BEYOND BARISTA ACADEMY -->
+  <path id="textArc" d="M 64,256 A 192,192 0 1,1 448,256" fill="none"/>
+  <text font-family="'Cormorant Garamond', 'Georgia', serif" font-weight="700" font-size="28" fill="url(#goldGrad)" letter-spacing="4">
+    <textPath href="#textArc" startOffset="50%" text-anchor="middle">
+      BEYOND BARISTA ACADEMY
+    </textPath>
+  </text>
+
+  <!-- Inner Ring -->
+  <circle cx="256" cy="265" r="145" fill="none" stroke="url(#goldGrad)" stroke-width="3"/>
+  <circle cx="256" cy="265" r="139" fill="none" stroke="url(#goldGrad)" stroke-width="1.5"/>
+
+  <!-- Laurel Wreath Left -->
+  <g fill="url(#goldGrad)">
+    <path d="M145 280 C130 260 135 230 150 210 C145 225 150 245 160 255 Z"/>
+    <path d="M138 245 C120 230 122 205 135 185 C132 200 140 218 150 225 Z"/>
+    <path d="M140 210 C125 190 130 165 145 150 C140 165 150 180 158 188 Z"/>
+    <path d="M152 178 C140 160 148 138 165 125 C158 140 168 155 174 160 Z"/>
+    <!-- Laurel Wreath Right -->
+    <path d="M367 280 C382 260 377 230 362 210 C367 225 362 245 352 255 Z"/>
+    <path d="M374 245 C392 230 390 205 377 185 C380 200 372 218 362 225 Z"/>
+    <path d="M372 210 C387 190 382 165 367 150 C372 165 362 180 354 188 Z"/>
+    <path d="M360 178 C372 160 364 138 347 125 C354 140 344 155 338 160 Z"/>
+  </g>
+
+  <!-- Coffee Beans at Top -->
+  <g fill="url(#goldGrad)" transform="translate(256, 175)">
+    <!-- Bean 1 -->
+    <ellipse cx="-16" cy="-12" rx="11" ry="16" transform="rotate(-25, -16, -12)"/>
+    <path d="M-22,-20 C-16,-12 -16,-12 -10,-4" stroke="#3D2314" stroke-width="2.5" fill="none"/>
+    <!-- Bean 2 -->
+    <ellipse cx="16" cy="-12" rx="11" ry="16" transform="rotate(25, 16, -12)"/>
+    <path d="M10,-20 C16,-12 16,-12 22,-4" stroke="#3D2314" stroke-width="2.5" fill="none"/>
+  </g>
+
+  <!-- Portafilter Icon -->
+  <g fill="url(#goldGrad)" filter="url(#shadow)">
+    <!-- Portafilter Basket -->
+    <rect x="226" y="202" width="60" height="24" rx="4" fill="url(#goldGrad)"/>
+    <path d="M236 226 L246 242 L266 242 L276 226 Z" fill="url(#goldGrad)"/>
+    <!-- Spout Streams -->
+    <circle cx="248" cy="247" r="3" fill="url(#goldGrad)"/>
+    <circle cx="264" cy="247" r="3" fill="url(#goldGrad)"/>
+    <!-- Portafilter Handle -->
+    <path d="M286 210 L350 210 C356 210 360 214 360 220 C360 226 356 230 350 230 L286 230 Z" fill="url(#goldGrad)"/>
+  </g>
+
+  <!-- Cocktail / Martini Glass Icon -->
+  <g stroke="url(#goldGrad)" stroke-width="5" fill="none" filter="url(#shadow)">
+    <!-- Triangle Bowl -->
+    <polygon points="206,258 306,258 256,315" fill="url(#goldGrad)" fill-opacity="0.2" stroke="url(#goldGrad)" stroke-width="5"/>
+    <!-- Stem -->
+    <line x1="256" y1="315" x2="256" y2="365" stroke-width="6"/>
+    <!-- Base -->
+    <line x1="220" y1="365" x2="292" y2="365" stroke-width="6" stroke-linecap="round"/>
+  </g>
+
+  <!-- Ribbon Banner at Bottom -->
+  <g filter="url(#shadow)">
+    <!-- Banner Ribbon Body -->
+    <path d="M 120,380 Q 256,415 392,380 L 375,425 Q 256,455 137,425 Z" fill="url(#goldGrad)"/>
+    <!-- Ribbon Fold Left -->
+    <path d="M 120,380 L 95,395 L 125,415 L 137,425 Z" fill="#9A7338"/>
+    <!-- Ribbon Fold Right -->
+    <path d="M 392,380 L 417,395 L 387,415 L 375,425 Z" fill="#9A7338"/>
+    <!-- BBA Text -->
+    <text x="256" y="420" font-family="'Cormorant Garamond', 'Georgia', serif" font-weight="900" font-size="34" fill="#2C1810" text-anchor="middle" letter-spacing="6">
+      BBA
+    </text>
+  </g>
+</svg>

@@ -1,0 +1,17 @@
+{
+    "name": "beyondbarista/lms",
+    "description": "Beyond Barista Academy — Premium Learning Management System for Rwanda Hospitality Education",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        },
+        "files": [
+            "app/Helpers/helpers.php"
+        ]
+    }
+}

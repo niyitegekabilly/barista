@@ -1,0 +1,12 @@
+# Public directory - serve files as-is
+# This directory is handled by the root .htaccess
+
+# Disable directory listing
+Options -Indexes
+
+# Proper MIME types
+<IfModule mod_mime.c>
+    AddType text/css .css
+    AddType application/javascript .js
+    AddType application/json .json
+</IfModule>
