@@ -42,9 +42,10 @@ $router->get('/blog/{slug}',        [BlogController::class, 'show']);
 $router->get('/events',             [EventController::class, 'index']);
 $router->get('/jobs',               [JobController::class, 'index']);
 
-// Certificate Verification (public)
+// Certificate Verification & Printable (public)
 $router->get('/certificate/verify',        [CertificateController::class, 'verify']);
 $router->get('/certificate/verify/{code}', [CertificateController::class, 'verify']);
+$router->get('/certificate/print/{code}',  [CertificateController::class, 'print']);
 
 // ─── Auth Routes ──────────────────────────────────────────────────────────────
 $router->get('/login',              [AuthController::class, 'showLogin']);
@@ -253,7 +254,12 @@ $router->get('/admin/membership-plans/create',        [\App\Controllers\AdminMem
 $router->post('/admin/membership-plans/store',        [\App\Controllers\AdminMembershipController::class, 'storePlan'],         ['auth', 'role:admin,super_admin', 'csrf']);
 $router->get('/admin/membership-plans/{id}/edit',     [\App\Controllers\AdminMembershipController::class, 'editPlan'],          ['auth', 'role:admin,super_admin']);
 $router->post('/admin/membership-plans/{id}/update',  [\App\Controllers\AdminMembershipController::class, 'updatePlan'],        ['auth', 'role:admin,super_admin', 'csrf']);
-$router->match(['POST', 'DELETE'], '/admin/membership-plans/{id}/delete', [\App\Controllers\AdminMembershipController::class, 'deletePlan'], ['auth', 'role:admin,super_admin', 'csrf']);
+// Admin Certificates Management
+$router->get('/admin/certificates',                    [\App\Controllers\AdminCertificateController::class, 'index'],            ['auth', 'role:admin,super_admin']);
+$router->get('/admin/certificates/export',             [\App\Controllers\AdminCertificateController::class, 'exportCsv'],        ['auth', 'role:admin,super_admin']);
+$router->post('/admin/certificates/issue',             [\App\Controllers\AdminCertificateController::class, 'issue'],            ['auth', 'role:admin,super_admin', 'csrf']);
+$router->post('/admin/certificates/{id}/revoke',       [\App\Controllers\AdminCertificateController::class, 'revoke'],           ['auth', 'role:admin,super_admin', 'csrf']);
+$router->post('/admin/certificates/{id}/reissue',      [\App\Controllers\AdminCertificateController::class, 'reissue'],          ['auth', 'role:admin,super_admin', 'csrf']);
 
 // Blog
 $router->get('/admin/blog',                  [AdminController::class, 'blog'],             ['auth', 'role:admin']);

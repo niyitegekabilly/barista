@@ -76,23 +76,6 @@ class JobController extends Controller
     }
 }
 
-class CertificateController extends Controller
-{
-    public function verify(?string $code = null): void
-    {
-        $result = null;
-        if ($code) {
-            $result = $this->db()->fetchOne(
-                "SELECT cert.*, c.title course_title, u.name student_name FROM certificates cert
-                 JOIN courses c ON cert.course_id = c.id JOIN users u ON cert.user_id = u.id
-                 WHERE cert.certificate_number = ?",
-                [$code]
-            );
-        }
-        $this->render('public/certificates/verify', compact('result', 'code'), 'main');
-    }
-}
-
 class ApiController extends Controller
 {
     public function toggleWishlist(): void

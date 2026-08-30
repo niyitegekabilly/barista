@@ -1,106 +1,105 @@
-<div class="bg-primary-dark text-white py-5 text-center" style="background: linear-gradient(135deg, #1E1301, #4C3103);">
-    <div class="container py-3">
-        <div class="certificate-seal mx-auto mb-3" style="width:70px;height:70px;font-size:1.8rem;">
-            <i class="bi bi-shield-check"></i>
-        </div>
-        <h1 class="font-heading text-white fw-bold display-6 mb-2">Certificate Authentication Portal</h1>
-        <p class="text-light opacity-80 max-w-700 mx-auto">
-            Official public verification system for Beyond Barista Academy Rwanda credentials.
-        </p>
-    </div>
-</div>
+<?php $pageTitle = 'Official Certificate Verification'; ?>
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <!-- Search Form -->
-            <div class="card p-4 p-lg-5 border-0 shadow-lg rounded-4 mb-5">
-                <form action="<?= url('certificate/verify') ?>" method="GET">
-                    <label class="form-label fw-bold text-dark mb-2">Enter Certificate Number</label>
-                    <div class="input-group input-group-lg mb-2">
-                        <span class="input-group-text bg-light"><i class="bi bi-qr-code-scan"></i></span>
-                        <input type="text" name="code" class="form-control" placeholder="e.g. BBA-2026-000123" value="<?= e($searchedCode ?? '') ?>" required>
-                        <button type="submit" class="btn btn-primary px-4 fw-bold">Verify Credential</button>
-                    </div>
-                    <small class="text-muted">The certificate number can be found on the bottom-right corner of the official diploma or below the QR code.</small>
-                </form>
+<section class="py-5 bg-surface" style="min-height: 80vh;">
+    <div class="container py-4">
+        
+        <!-- Header -->
+        <div class="text-center max-w-700 mx-auto mb-5">
+            <div class="d-inline-flex align-items-center justify-content-center mb-3" style="width:72px; height:72px; border-radius:50%; background: linear-gradient(135deg, #180D06, #3D2214); color:#F3C78E; box-shadow: 0 6px 20px rgba(24,13,6,0.2);">
+                <i class="bi bi-shield-check fs-1"></i>
             </div>
+            <h1 class="font-heading fw-bold text-dark mb-2">Certificate Verification Portal</h1>
+            <p class="text-muted">Verify the authenticity of digital certificates issued by Beyond Barista Academy for specialty coffee and hospitality vocational programs.</p>
 
-            <!-- Sample Diploma Showcase when no certificate code queried -->
-            <?php if (!isset($certificate)): ?>
-                <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-5">
-                    <div class="card-header bg-dark text-white p-4">
-                        <h5 class="font-heading mb-1 text-white"><i class="bi bi-award-fill text-warning me-2"></i> Sample Beyond Barista Digital Diploma</h5>
-                        <p class="text-white-50 small mb-0">Every graduate receives an official verifiable credential like the sample below.</p>
-                    </div>
-                    <div class="p-3 bg-light text-center">
-                        <img src="<?= asset('img/cert3.jpg') ?>" alt="Official Certificate Sample" class="img-fluid rounded-3 shadow-sm border" style="max-height: 380px; width: auto; object-fit: contain;">
-                    </div>
+            <!-- Verification Search Form -->
+            <form action="<?= url('certificate/verify') ?>" method="GET" class="card p-2 border-0 shadow-sm rounded-pill max-w-500 mx-auto mt-4 bg-white">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-0 ps-3 text-muted">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" name="code" class="form-control border-0 shadow-none font-monospace" placeholder="e.g. BBA-CERT-202608-ABC12" value="<?= e($code ?? '') ?>" required />
+                    <button type="submit" class="btn btn-primary fw-bold px-4 rounded-pill">
+                        Verify Now
+                    </button>
                 </div>
-            <?php endif; ?>
+            </form>
+        </div>
 
-            <!-- Verification Result -->
-            <?php if (isset($certificate)): ?>
-                <?php if ($certificate): ?>
-                    <div class="card border-0 shadow-xl rounded-4 overflow-hidden">
-                        <div class="bg-success text-white py-3 px-4 d-flex align-items-center gap-2">
-                            <i class="bi bi-patch-check-fill fs-3"></i>
-                            <div>
-                                <h5 class="mb-0 fw-bold">Valid & Authenticated Credential</h5>
-                                <small class="text-white-50">Issued by Beyond Barista Academy Rwanda</small>
-                            </div>
+        <!-- Verification Result -->
+        <?php if (!empty($verification)): ?>
+            <div class="max-w-700 mx-auto">
+                <?php if ($verification['valid']): ?>
+                    <?php $cert = $verification['certificate']; ?>
+                    <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white">
+                        <div class="p-4 bg-success text-white text-center">
+                            <i class="bi bi-patch-check-fill display-4 mb-2 d-block"></i>
+                            <h3 class="font-heading fw-bold mb-1">Authentic Certificate Verified</h3>
+                            <p class="mb-0 small opacity-90">Issued by Beyond Barista Academy Registrar</p>
                         </div>
 
-                        <div class="card-body p-4 p-lg-5">
-                            <div class="row g-4 align-items-center">
-                                <div class="col-md-8">
-                                    <div class="mb-3">
-                                        <small class="text-muted text-uppercase fw-bold" style="font-size:0.75rem;">Certificate Holder</small>
-                                        <h3 class="font-heading text-dark mb-0"><?= e($certificate['student_name']) ?></h3>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <small class="text-muted text-uppercase fw-bold" style="font-size:0.75rem;">Training Program</small>
-                                        <h5 class="font-heading text-primary mb-0"><?= e($certificate['course_title']) ?></h5>
-                                    </div>
-
-                                    <div class="row g-3 text-muted small">
-                                        <div class="col-6">
-                                            <strong>Certificate Number:</strong><br>
-                                            <span class="font-monospace text-dark fs-6"><?= e($certificate['certificate_number']) ?></span>
-                                        </div>
-                                        <div class="col-6">
-                                            <strong>Date of Issue:</strong><br>
-                                            <span class="text-dark"><?= date('F d, Y', strtotime($certificate['issue_date'])) ?></span>
-                                        </div>
-                                        <div class="col-6">
-                                            <strong>Discipline:</strong><br>
-                                            <span class="text-dark"><?= e($certificate['category_name']) ?></span>
-                                        </div>
-                                        <div class="col-6">
-                                            <strong>Status:</strong><br>
-                                            <span class="badge bg-success">ACTIVE & VALID</span>
-                                        </div>
-                                    </div>
+                        <div class="card-body p-4 p-md-5">
+                            <div class="row g-4 mb-4">
+                                <div class="col-sm-6">
+                                    <span class="text-muted small text-uppercase d-block mb-1" style="letter-spacing:1px;">Recipient Name</span>
+                                    <h5 class="fw-bold text-dark mb-0"><?= e($cert['student_name']) ?></h5>
+                                    <?php if (!empty($cert['student_id'])): ?>
+                                        <small class="text-muted font-monospace">ID: <?= e($cert['student_id']) ?></small>
+                                    <?php endif; ?>
                                 </div>
 
-                                <div class="col-md-4 text-center">
-                                    <div class="p-3 bg-light rounded-3 d-inline-block border">
-                                        <img src="<?= e($certificate['qr_code_url']) ?>" alt="QR Code" style="width:140px;height:140px;" class="img-fluid">
-                                    </div>
-                                    <small class="text-muted d-block mt-2" style="font-size:0.75rem;">Official Digital Stamp</small>
+                                <div class="col-sm-6">
+                                    <span class="text-muted small text-uppercase d-block mb-1" style="letter-spacing:1px;">Course & Credential</span>
+                                    <h5 class="fw-bold text-dark mb-0"><?= e($cert['course_title']) ?></h5>
+                                    <small class="text-muted"><?= e($cert['course_level'] ?? 'Professional Certification') ?></small>
                                 </div>
+
+                                <div class="col-sm-6">
+                                    <span class="text-muted small text-uppercase d-block mb-1" style="letter-spacing:1px;">Certificate Number</span>
+                                    <span class="badge bg-light text-dark border font-monospace fs-6 px-3 py-2"><?= e($cert['certificate_number']) ?></span>
+                                </div>
+
+                                <div class="col-sm-6">
+                                    <span class="text-muted small text-uppercase d-block mb-1" style="letter-spacing:1px;">Date of Issuance</span>
+                                    <span class="fw-bold text-dark fs-6"><?= date('F d, Y', strtotime($cert['issue_date'])) ?></span>
+                                </div>
+
+                                <?php if (!empty($cert['grade_score'])): ?>
+                                    <div class="col-sm-6">
+                                        <span class="text-muted small text-uppercase d-block mb-1" style="letter-spacing:1px;">Academic Standing</span>
+                                        <span class="fw-bold text-success fs-6"><i class="bi bi-star-fill text-warning me-1"></i> <?= e($cert['grade_score']) ?>% • <?= e($cert['grade_letter'] ?? 'Passed') ?></span>
+                                    </div>
+                                <?php endif; ?>
+
+                                <div class="col-sm-6">
+                                    <span class="text-muted small text-uppercase d-block mb-1" style="letter-spacing:1px;">Issuing Instructor</span>
+                                    <span class="fw-bold text-dark fs-6"><?= e($cert['instructor_name'] ?? 'Beyond Barista Master Trainers') ?></span>
+                                </div>
+                            </div>
+
+                            <hr class="my-4" />
+
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                                <a href="<?= url('certificate/print/' . $cert['certificate_number']) ?>" target="_blank" class="btn btn-outline-secondary fw-bold px-3">
+                                    <i class="bi bi-file-earmark-pdf me-1"></i> View Print Layout
+                                </a>
+
+                                <?php if (!empty($verification['linkedInUrl'])): ?>
+                                    <a href="<?= $verification['linkedInUrl'] ?>" target="_blank" class="btn btn-primary fw-bold px-4">
+                                        <i class="bi bi-linkedin me-1"></i> Add to LinkedIn Profile
+                                    </a>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
                 <?php else: ?>
-                    <div class="card border-0 shadow-md rounded-4 p-5 text-center bg-danger-subtle text-danger">
-                        <div class="display-3 mb-3"><i class="bi bi-x-circle-fill text-danger"></i></div>
-                        <h4 class="font-heading">Certificate Not Found</h4>
-                        <p class="mb-0 text-muted">The certificate number <strong><?= e($searchedCode) ?></strong> does not exist in our registry or has been revoked. Please check the code and try again.</p>
+                    <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white">
+                        <i class="bi bi-exclamation-triangle-fill display-4 text-warning mb-3"></i>
+                        <h4 class="font-heading fw-bold text-dark">Verification Unsuccessful</h4>
+                        <p class="text-muted small max-w-500 mx-auto mb-0"><?= e($verification['message']) ?></p>
                     </div>
                 <?php endif; ?>
-            <?php endif; ?>
-        </div>
+            </div>
+        <?php endif; ?>
+
     </div>
-</div>
+</section>

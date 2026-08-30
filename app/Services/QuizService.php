@@ -2,122 +2,187 @@
 
 namespace App\Services;
 
+use App\Core\Database;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
-use App\Models\Enrollment;
-use App\Models\Course;
 use App\Models\Notification;
-use App\Models\AuditLog;
-use App\Core\Database;
 
 class QuizService {
-    public static function gradeAttempt(int $quizId, int $userId, array $submittedAnswers): array {
-        $quiz = Quiz::findWithQuestions($quizId);
+
+    /**
+     * Load quiz with questions and student attempt status.
+     */
+    public static function getQuizForStudent(int $quizId, int $userId): array {
+        $quiz = Quiz::findWithDetails($quizId);
         if (!$quiz) {
-            throw new \RuntimeException("Quiz not found.");
+            return ['success' => false, 'code' => 404, 'message' => 'Quiz not found.'];
         }
 
-        $enrollment = Enrollment::getUserEnrollment($userId, (int)$quiz['course_id']);
-        $enrollmentId = $enrollment ? (int)$enrollment['id'] : null;
+        $attempts = QuizAttempt::getUserAttempts($quizId, $userId);
+        $maxAttempts = (int)($quiz['max_attempts'] ?? 3);
+        $attemptsCount = count($attempts);
+        $canAttempt = ($attemptsCount < $maxAttempts);
+        $bestScore = QuizAttempt::getBestScore($quizId, $userId);
 
-        // Calculate attempt number
-        $prevAttempts = (int) Database::fetchValue(
+        $questions = Quiz::getQuestionsWithOptions($quizId, (bool)($quiz['randomize_questions'] ?? false));
+
+        return [
+            'success'          => true,
+            'quiz'             => $quiz,
+            'questions'        => $questions,
+            'total_questions'  => count($questions),
+            'attempts'         => $attempts,
+            'attempts_count'   => $attemptsCount,
+            'max_attempts'     => $maxAttempts,
+            'attempts_left'    => max(0, $maxAttempts - $attemptsCount),
+            'can_attempt'      => $canAttempt,
+            'best_score'       => $bestScore
+        ];
+    }
+
+    /**
+     * Submit and auto-grade quiz attempt.
+     */
+    public static function submitAttempt(int $userId, int $quizId, array $answers, int $durationSeconds = 0): array {
+        $quiz = Database::fetchOne("SELECT * FROM quizzes WHERE id = :id", ['id' => $quizId]);
+        if (!$quiz) {
+            return ['success' => false, 'message' => 'Quiz not found.'];
+        }
+
+        $courseId = (int)$quiz['course_id'];
+        $attemptsCount = (int)(Database::fetchValue(
             "SELECT COUNT(*) FROM quiz_attempts WHERE quiz_id = :qid AND user_id = :uid",
             ['qid' => $quizId, 'uid' => $userId]
+        ) ?: 0);
+
+        if ($attemptsCount >= (int)($quiz['max_attempts'] ?? 3)) {
+            return ['success' => false, 'message' => 'You have exhausted all available attempts for this examination.'];
+        }
+
+        // Fetch Enrollment
+        $enrollment = Database::fetchOne(
+            "SELECT * FROM enrollments WHERE course_id = :cid AND user_id = :uid",
+            ['cid' => $courseId, 'uid' => $userId]
         );
-        $attemptNumber = $prevAttempts + 1;
+        $enrollmentId = $enrollment ? (int)$enrollment['id'] : null;
+
+        // Fetch All Questions
+        $questions = Database::fetchAll("SELECT * FROM quiz_questions WHERE quiz_id = :qid ORDER BY sort_order ASC", ['qid' => $quizId]);
 
         $totalPoints = 0;
         $earnedPoints = 0;
-        $answerRecords = [];
+        $gradedAnswers = [];
+        $hasEssay = false;
 
-        foreach ($quiz['questions'] as $question) {
-            $qId = (int) $question['id'];
-            $qPoints = (int) $question['points'];
-            $totalPoints += $qPoints;
+        foreach ($questions as $q) {
+            $qId = (int)$q['id'];
+            $points = (int)($q['points'] ?? 1);
+            $totalPoints += $points;
+            $userAns = $answers[$qId] ?? null;
 
-            $userAnswer = $submittedAnswers[$qId] ?? null;
-            $isCorrect = false;
+            $isCorrect = 0;
             $pointsAwarded = 0;
+            $selectedOptId = null;
+            $answerText = null;
 
-            if ($question['question_type'] === 'single_choice' || $question['question_type'] === 'true_false') {
+            if ($q['question_type'] === 'single_choice' || $q['question_type'] === 'true_false') {
+                $selectedOptId = (int)$userAns;
                 $correctOpt = Database::fetchOne("SELECT id FROM quiz_options WHERE question_id = :qid AND is_correct = 1 LIMIT 1", ['qid' => $qId]);
-                if ($correctOpt && (int)$userAnswer === (int)$correctOpt['id']) {
-                    $isCorrect = true;
-                    $pointsAwarded = $qPoints;
-                    $earnedPoints += $qPoints;
+                if ($correctOpt && $selectedOptId === (int)$correctOpt['id']) {
+                    $isCorrect = 1;
+                    $pointsAwarded = $points;
                 }
-            } elseif ($question['question_type'] === 'fill_blank') {
-                $correctOpt = Database::fetchOne("SELECT option_text FROM quiz_options WHERE question_id = :qid AND is_correct = 1 LIMIT 1", ['qid' => $qId]);
-                if ($correctOpt && strcasecmp(trim((string)$userAnswer), trim($correctOpt['option_text'])) === 0) {
-                    $isCorrect = true;
-                    $pointsAwarded = $qPoints;
-                    $earnedPoints += $qPoints;
+            } elseif ($q['question_type'] === 'multiple_choice') {
+                // Array of selected options
+                $selectedIds = is_array($userAns) ? array_map('intval', $userAns) : [(int)$userAns];
+                $correctOptIds = array_column(
+                    Database::fetchAll("SELECT id FROM quiz_options WHERE question_id = :qid AND is_correct = 1", ['qid' => $qId]),
+                    'id'
+                );
+                sort($selectedIds);
+                sort($correctOptIds);
+                if ($selectedIds === $correctOptIds) {
+                    $isCorrect = 1;
+                    $pointsAwarded = $points;
                 }
+                $answerText = json_encode($selectedIds);
+            } elseif ($q['question_type'] === 'essay' || $q['question_type'] === 'short_answer') {
+                $answerText = is_string($userAns) ? trim($userAns) : '';
+                $hasEssay = true;
             }
 
-            $answerRecords[] = [
-                'question_id' => $qId,
-                'selected_option_id' => is_numeric($userAnswer) ? (int)$userAnswer : null,
-                'answer_text' => is_string($userAnswer) ? $userAnswer : null,
-                'is_correct' => $isCorrect ? 1 : 0,
-                'points_awarded' => $pointsAwarded
+            $earnedPoints += $pointsAwarded;
+
+            $gradedAnswers[] = [
+                'question_id'       => $qId,
+                'question_text'     => $q['question_text'],
+                'question_type'     => $q['question_type'],
+                'explanation'       => $q['explanation'],
+                'selected_option_id'=> $selectedOptId,
+                'answer_text'       => $answerText,
+                'is_correct'        => $isCorrect,
+                'points_awarded'    => $pointsAwarded,
+                'max_points'        => $points
             ];
         }
 
-        $percentage = $totalPoints > 0 ? round(($earnedPoints / $totalPoints) * 100, 2) : 0.00;
+        $percentage = ($totalPoints > 0) ? round(($earnedPoints / $totalPoints) * 100, 2) : 0.00;
         $isPassed = ($percentage >= (float)$quiz['passing_score']);
+        $status = $hasEssay ? 'submitted' : ($isPassed ? 'passed' : 'failed');
 
-        // Insert attempt in transaction
-        $attemptId = 0;
-        Database::transaction(function() use (&$attemptId, $quizId, $userId, $enrollmentId, $attemptNumber, $totalPoints, $earnedPoints, $percentage, $isPassed, $answerRecords) {
-            $attemptId = Database::insert('quiz_attempts', [
-                'quiz_id' => $quizId,
-                'user_id' => $userId,
-                'enrollment_id' => $enrollmentId,
-                'attempt_number' => $attemptNumber,
-                'total_points' => $totalPoints,
-                'earned_points' => $earnedPoints,
-                'score_percentage' => $percentage,
-                'is_passed' => $isPassed ? 1 : 0,
-                'started_at' => date('Y-m-d H:i:s', strtotime('-15 minutes')),
-                'completed_at' => date('Y-m-d H:i:s'),
-                'created_at' => date('Y-m-d H:i:s')
-            ]);
-
-            foreach ($answerRecords as $rec) {
-                $rec['attempt_id'] = $attemptId;
-                Database::insert('quiz_answers', $rec);
-            }
-        });
-
-        // If passed, check if all course criteria met to generate certificate
-        if ($isPassed && $enrollmentId) {
-            Enrollment::update($enrollmentId, ['status' => 'completed', 'completed_at' => date('Y-m-d H:i:s')]);
-            $cert = CertificateService::generate($enrollmentId);
-            
-            Notification::send(
-                $userId,
-                '🎉 Assessment Passed & Certificate Awarded!',
-                "Congratulations! You scored {$percentage}% on {$quiz['title']}. Your verified certificate is ready.",
-                $cert ? url("student/certificates") : null
-            );
-        }
-
-        AuditLog::log('quiz_submitted', 'quiz', $quizId, [
-            'user_id' => $userId,
-            'attempt_id' => $attemptId,
-            'score' => $percentage,
-            'passed' => $isPassed
+        // Record Attempt
+        $attemptId = Database::insert('quiz_attempts', [
+            'quiz_id'          => $quizId,
+            'user_id'          => $userId,
+            'enrollment_id'    => $enrollmentId,
+            'attempt_number'   => $attemptsCount + 1,
+            'total_points'     => $totalPoints,
+            'earned_points'    => $earnedPoints,
+            'score_percentage' => $percentage,
+            'duration_seconds' => $durationSeconds,
+            'is_passed'        => $isPassed ? 1 : 0,
+            'status'           => $status,
+            'started_at'       => date('Y-m-d H:i:s', time() - max(1, $durationSeconds)),
+            'completed_at'     => date('Y-m-d H:i:s'),
+            'created_at'       => date('Y-m-d H:i:s')
         ]);
 
+        // Record Question Answers
+        foreach ($gradedAnswers as $ga) {
+            Database::insert('quiz_answers', [
+                'attempt_id'        => $attemptId,
+                'question_id'       => $ga['question_id'],
+                'selected_option_id'=> $ga['selected_option_id'],
+                'answer_text'       => $ga['answer_text'],
+                'is_correct'        => $ga['is_correct'],
+                'points_awarded'    => $ga['points_awarded']
+            ]);
+        }
+
+        // Automated Certificate Trigger:
+        // If passed AND course enrollment has reached 100% progress, issue certificate!
+        $certificateGenerated = null;
+        if ($isPassed && $enrollmentId) {
+            $progressPct = (int)($enrollment['progress_percent'] ?? 0);
+            if ($progressPct >= 100) {
+                $certRes = CertificateService::generateCertificateForEnrollment($enrollmentId);
+                if ($certRes['success']) {
+                    $certificateGenerated = $certRes['certificate_number'];
+                }
+            }
+        }
+
         return [
-            'attempt_id' => $attemptId,
-            'total_points' => $totalPoints,
-            'earned_points' => $earnedPoints,
-            'score_percentage' => $percentage,
-            'is_passed' => $isPassed,
-            'passing_score' => $quiz['passing_score']
+            'success'              => true,
+            'attempt_id'           => $attemptId,
+            'quiz'                 => $quiz,
+            'total_points'         => $totalPoints,
+            'earned_points'        => $earnedPoints,
+            'percentage'           => $percentage,
+            'passing_score'        => (float)$quiz['passing_score'],
+            'is_passed'            => $isPassed,
+            'graded_answers'       => $gradedAnswers,
+            'certificate_number'   => $certificateGenerated
         ];
     }
 }
