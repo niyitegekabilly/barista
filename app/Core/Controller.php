@@ -16,10 +16,11 @@ abstract class Controller
      */
     protected function render(string $view, array $data = [], string $layout = 'main'): void
     {
+        $layout = ltrim(str_replace('layouts/', '', $layout), '/');
         if ($layout === 'admin') {
             $layout = 'dashboard';
         }
-        $layoutFile = 'layouts/' . $layout;
+        $layoutFile = 'layouts/' . ($layout ?: 'main');
         echo View::render($view, $data, $layoutFile);
     }
 

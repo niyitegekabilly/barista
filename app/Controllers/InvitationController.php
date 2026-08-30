@@ -17,7 +17,7 @@ class InvitationController extends Controller {
         if (!$invitation) {
             $this->render('auth/invalid-invite', [
                 'pageTitle' => 'Invitation Expired or Invalid'
-            ], 'layouts/auth');
+            ], 'auth');
             return;
         }
 
@@ -25,7 +25,7 @@ class InvitationController extends Controller {
             'pageTitle' => 'Welcome to Beyond Barista Academy — Set Up Your Account',
             'invitation' => $invitation,
             'token' => $token
-        ], 'layouts/auth');
+        ], 'auth');
     }
 
     /**
