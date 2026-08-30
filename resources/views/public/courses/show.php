@@ -64,8 +64,8 @@
                                     </button>
                                 </form>
                             <?php else: ?>
-                                <a href="<?= url('checkout?type=course&id=' . e($course['id'])) ?>" class="btn btn-primary btn-lg w-100 fw-bold mb-3">
-                                    <i class="bi bi-credit-card me-1"></i> Buy Course with Momo / Card
+                                <a href="<?= url('checkout/' . e($course['slug'])) ?>" class="btn btn-primary btn-lg w-100 fw-bold mb-3 shadow">
+                                    <i class="bi bi-credit-card me-1"></i> Enroll Now — <?= format_money($course['discount_price'] ?: $course['price'], 'RWF') ?>
                                 </a>
                             <?php endif; ?>
                         <?php endif; ?>

@@ -394,3 +394,32 @@ if (!function_exists('errors')) {
         return $errors[$key] ?? null;
     }
 }
+
+if (!function_exists('format_money')) {
+    function format_money(float|int $amount, string $currency = 'RWF'): string {
+        $currency = strtoupper(trim($currency ?: 'RWF'));
+        if ($currency === 'USD') {
+            return '$' . number_format((float)$amount, 2);
+        }
+        if ($currency === 'EUR') {
+            return '€' . number_format((float)$amount, 2);
+        }
+        if ($currency === 'GBP') {
+            return '£' . number_format((float)$amount, 2);
+        }
+        // Default to RWF
+        return number_format((float)$amount, 0) . ' RWF';
+    }
+}
+
+if (!function_exists('format_rwf')) {
+    function format_rwf(float|int $amount): string {
+        return number_format((float)$amount, 0) . ' RWF';
+    }
+}
+
+if (!function_exists('format_usd')) {
+    function format_usd(float|int $amount): string {
+        return '$' . number_format((float)$amount, 2);
+    }
+}

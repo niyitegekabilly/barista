@@ -178,12 +178,38 @@ $router->post('/admin/tags/{id}/update',              [\App\Controllers\AdminTag
 $router->post('/admin/tags/{id}/delete',              [\App\Controllers\AdminTagController::class, 'delete'],                  ['auth', 'role:admin,super_admin', 'csrf']);
 $router->get('/api/tags/search',                      [\App\Controllers\AdminTagController::class, 'apiSearch']);
 
-// Orders & Coupons
-$router->get('/admin/orders',                [AdminController::class, 'orders'],           ['auth', 'role:admin']);
-$router->get('/admin/coupons',               [AdminController::class, 'coupons'],          ['auth', 'role:admin']);
-$router->post('/admin/coupons/store',        [AdminController::class, 'storeCoupon'],      ['auth', 'role:admin', 'csrf']);
-$router->post('/admin/coupons/{id}/toggle',  [AdminController::class, 'toggleCoupon'],     ['auth', 'role:admin', 'csrf']);
-$router->match(['POST', 'DELETE'], '/admin/coupons/{id}/delete', [AdminController::class, 'deleteCoupon'], ['auth', 'role:admin', 'csrf']);
+// Public Checkout & Invoices
+$router->get('/checkout/{slug}',                      [\App\Controllers\CheckoutController::class, 'show'],                    ['auth']);
+$router->post('/checkout/process',                    [\App\Controllers\CheckoutController::class, 'process'],                 ['auth', 'csrf']);
+$router->post('/api/checkout/validate-coupon',        [\App\Controllers\CheckoutController::class, 'validateCoupon'],          ['auth']);
+$router->get('/checkout/success/{orderNumber}',       [\App\Controllers\CheckoutController::class, 'success'],                 ['auth']);
+$router->get('/checkout/failed/{orderNumber}',        [\App\Controllers\CheckoutController::class, 'failed'],                  ['auth']);
+$router->get('/invoice/{invoiceNumber}',              [\App\Controllers\InvoiceController::class, 'show'],                     ['auth']);
+$router->get('/receipt/{receiptNumber}',              [\App\Controllers\InvoiceController::class, 'receipt'],                  ['auth']);
+$router->post('/api/webhooks/payment/{gateway}',      [\App\Controllers\WebhookController::class, 'handle']);
+
+// Admin Finance & Revenue Hub
+$router->get('/admin/finance',                        [\App\Controllers\AdminFinanceController::class, 'dashboard'],            ['auth', 'role:admin,super_admin']);
+$router->get('/admin/finance/reports',                [\App\Controllers\AdminFinanceController::class, 'reports'],              ['auth', 'role:admin,super_admin']);
+$router->get('/admin/finance/ledger',                 [\App\Controllers\AdminFinanceController::class, 'ledger'],               ['auth', 'role:admin,super_admin']);
+
+// Admin Orders Management
+$router->get('/admin/orders',                         [\App\Controllers\AdminOrderController::class, 'index'],                  ['auth', 'role:admin,super_admin']);
+$router->get('/admin/orders/export',                  [\App\Controllers\AdminOrderController::class, 'export'],                 ['auth', 'role:admin,super_admin']);
+$router->get('/admin/orders/{id}',                    [\App\Controllers\AdminOrderController::class, 'show'],                   ['auth', 'role:admin,super_admin']);
+$router->post('/admin/orders/{id}/refund',            [\App\Controllers\AdminOrderController::class, 'refund'],                 ['auth', 'role:admin,super_admin', 'csrf']);
+$router->post('/admin/orders/{id}/cancel',            [\App\Controllers\AdminOrderController::class, 'cancel'],                 ['auth', 'role:admin,super_admin', 'csrf']);
+$router->post('/admin/orders/{id}/add-note',          [\App\Controllers\AdminOrderController::class, 'addNote'],                ['auth', 'role:admin,super_admin', 'csrf']);
+$router->post('/admin/orders/{id}/verify-manual',     [\App\Controllers\AdminOrderController::class, 'verifyManualPayment'],    ['auth', 'role:admin,super_admin', 'csrf']);
+
+// Admin Payments Management
+$router->get('/admin/payments',                       [\App\Controllers\AdminPaymentController::class, 'index'],                ['auth', 'role:admin,super_admin']);
+
+// Coupons
+$router->get('/admin/coupons',                        [AdminController::class, 'coupons'],                                      ['auth', 'role:admin,super_admin']);
+$router->post('/admin/coupons/store',                 [AdminController::class, 'storeCoupon'],                                  ['auth', 'role:admin,super_admin', 'csrf']);
+$router->post('/admin/coupons/{id}/toggle',           [AdminController::class, 'toggleCoupon'],                                 ['auth', 'role:admin,super_admin', 'csrf']);
+$router->match(['POST', 'DELETE'], '/admin/coupons/{id}/delete', [AdminController::class, 'deleteCoupon'],                    ['auth', 'role:admin,super_admin', 'csrf']);
 
 // Blog
 $router->get('/admin/blog',                  [AdminController::class, 'blog'],             ['auth', 'role:admin']);

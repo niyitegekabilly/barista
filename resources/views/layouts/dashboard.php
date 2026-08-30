@@ -102,11 +102,17 @@
                     <a class="sidebar-nav-item <?= str_contains($_SERVER['REQUEST_URI'], '/admin/tags') ? 'active' : '' ?>" href="<?= url('admin/tags') ?>">
                         <i class="bi bi-tags-fill"></i> <span>Taxonomy Tags</span>
                     </a>
+                    <a class="sidebar-nav-item <?= str_contains($_SERVER['REQUEST_URI'], '/admin/finance') ? 'active' : '' ?>" href="<?= url('admin/finance') ?>">
+                        <i class="bi bi-graph-up-arrow"></i> <span>Finance & Revenue</span>
+                    </a>
                     <a class="sidebar-nav-item <?= str_contains($_SERVER['REQUEST_URI'], '/admin/orders') ? 'active' : '' ?>" href="<?= url('admin/orders') ?>">
-                        <i class="bi bi-receipt"></i> <span>Finance & Orders</span>
+                        <i class="bi bi-receipt"></i> <span>Customer Orders</span>
+                    </a>
+                    <a class="sidebar-nav-item <?= str_contains($_SERVER['REQUEST_URI'], '/admin/payments') ? 'active' : '' ?>" href="<?= url('admin/payments') ?>">
+                        <i class="bi bi-credit-card-2-front-fill"></i> <span>Payment Transactions</span>
                     </a>
                     <a class="sidebar-nav-item <?= str_contains($_SERVER['REQUEST_URI'], '/admin/coupons') ? 'active' : '' ?>" href="<?= url('admin/coupons') ?>">
-                        <i class="bi bi-ticket-perforated-fill"></i> <span>Coupons</span>
+                        <i class="bi bi-ticket-perforated-fill"></i> <span>Coupons & Discounts</span>
                     </a>
                     <a class="sidebar-nav-item <?= str_contains($_SERVER['REQUEST_URI'], '/admin/blog') ? 'active' : '' ?>" href="<?= url('admin/blog') ?>">
                         <i class="bi bi-pencil-square"></i> <span>Blog CMS</span>
