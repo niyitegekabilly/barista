@@ -23,11 +23,21 @@ class RoleMiddleware implements Middleware {
 
         $userRole = auth_role();
         // Super admin has access to everything
-        if ($userRole === 'super_admin') {
+        if ($userRole === 'super_admin' || \App\Models\User::hasRole(auth_id(), 'super_admin')) {
             return $next($request);
         }
 
-        if (!in_array($userRole, $this->allowedRoles, true)) {
+        $hasAccess = in_array($userRole, $this->allowedRoles, true);
+        if (!$hasAccess) {
+            foreach ($this->allowedRoles as $allowedRole) {
+                if (\App\Models\User::hasRole(auth_id(), trim($allowedRole))) {
+                    $hasAccess = true;
+                    break;
+                }
+            }
+        }
+
+        if (!$hasAccess) {
             if ($request->isAjax()) {
                 Response::json(['success' => false, 'message' => 'Unauthorized access.'], 403);
             }

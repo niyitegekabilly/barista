@@ -629,49 +629,49 @@ class DatabaseSeeder {
         // 10. Testimonials & FAQs
         $testimonials = [
             [
-                ‘author_name’ => ‘Emmanuel Habimana’,
-                ‘author_title’ => ‘Head Barista’,
-                ‘author_company’ => ‘Kivu Specialty Cafe’,
-                ‘content’ => ‘The structured video modules and dial-in charts from Beyond Barista Academy gave me the confidence to step into a head barista role. The verified QR certificate helped me secure my job within two weeks of graduation!’,
-                ‘rating’ => 5,
-                ‘is_active’ => 1,
-                ‘sort_order’ => 1
+                'author_name' => 'Emmanuel Habimana',
+                'author_title' => 'Head Barista',
+                'author_company' => 'Kivu Specialty Cafe',
+                'content' => 'The structured video modules and dial-in charts from Beyond Barista Academy gave me the confidence to step into a head barista role. The verified QR certificate helped me secure my job within two weeks of graduation!',
+                'rating' => 5,
+                'is_active' => 1,
+                'sort_order' => 1
             ],
             [
-                ‘author_name’ => ‘Diane Mukamana’,
-                ‘author_title’ => ‘F&B Manager’,
-                ‘author_company’ => ‘Serena Kigali Hotel’,
-                ‘content’ => ‘We train all our new service and bar staff using Beyond Barista Academy’s online platform. It ensures consistent international hospitality standards across our entire team.’,
-                ‘rating’ => 5,
-                ‘is_active’ => 1,
-                ‘sort_order’ => 2
+                'author_name' => 'Diane Mukamana',
+                'author_title' => 'F&B Manager',
+                'author_company' => 'Serena Kigali Hotel',
+                'content' => "We train all our new service and bar staff using Beyond Barista Academy's online platform. It ensures consistent international hospitality standards across our entire team.",
+                'rating' => 5,
+                'is_active' => 1,
+                'sort_order' => 2
             ],
             [
-                ‘author_name’ => ‘Jean Claude Mutuyimana’,
-                ‘author_title’ => ‘Coffee Roaster & Entrepreneur’,
-                ‘author_company’ => ‘Kigali Coffee Roasters Ltd.’,
-                ‘content’ => ‘From learning basic barista skills to mastering advanced roasting techniques, Beyond Barista Academy provided the comprehensive training I needed to start my own specialty coffee business.’,
-                ‘rating’ => 5,
-                ‘is_active’ => 1,
-                ‘sort_order’ => 3
+                'author_name' => 'Jean Claude Mutuyimana',
+                'author_title' => 'Coffee Roaster & Entrepreneur',
+                'author_company' => 'Kigali Coffee Roasters Ltd.',
+                'content' => 'From learning basic barista skills to mastering advanced roasting techniques, Beyond Barista Academy provided the comprehensive training I needed to start my own specialty coffee business.',
+                'rating' => 5,
+                'is_active' => 1,
+                'sort_order' => 3
             ],
             [
-                ‘author_name’ => ‘Anne-Marie Kanamugire’,
-                ‘author_title’ => ‘Hospitality Trainer’,
-                ‘author_company’ => ‘Rwanda Hotel & Restaurant Association’,
-                ‘content’ => ‘The curriculum is industry-aligned and covers everything from espresso extraction to customer service. Our hospitality partners love the quality of graduates from this academy.’,
-                ‘rating’ => 5,
-                ‘is_active’ => 1,
-                ‘sort_order’ => 4
+                'author_name' => 'Anne-Marie Kanamugire',
+                'author_title' => 'Hospitality Trainer',
+                'author_company' => 'Rwanda Hotel & Restaurant Association',
+                'content' => 'The curriculum is industry-aligned and covers everything from espresso extraction to customer service. Our hospitality partners love the quality of graduates from this academy.',
+                'rating' => 5,
+                'is_active' => 1,
+                'sort_order' => 4
             ],
             [
-                ‘author_name’ => ‘Marcus Uwizera’,
-                ‘author_title’ => ‘Coffee Exporter’,
-                ‘author_company’ => ‘Rwanda Premium Coffee Co.’,
-                ‘content’ => ‘Beyond Barista Academy understands the specialty coffee market in Rwanda. Their sensory cupping and quality control modules are world-class and recognized internationally.’,
-                ‘rating’ => 5,
-                ‘is_active’ => 1,
-                ‘sort_order’ => 5
+                'author_name' => 'Marcus Uwizera',
+                'author_title' => 'Coffee Exporter',
+                'author_company' => 'Rwanda Premium Coffee Co.',
+                'content' => 'Beyond Barista Academy understands the specialty coffee market in Rwanda. Their sensory cupping and quality control modules are world-class and recognized internationally.',
+                'rating' => 5,
+                'is_active' => 1,
+                'sort_order' => 5
             ]
         ];
 

@@ -1,8 +1,8 @@
 -- Beyond Barista Academy LMS Database Schema
 -- Compatible with MySQL 8.x / MariaDB (InnoDB, utf8mb4)
 
-CREATE DATABASE IF NOT EXISTS `if0_42630695_bba` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE `if0_42630695_bba`;
+CREATE DATABASE IF NOT EXISTS `beyondba_lms` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `beyondba_lms`;
 
 SET FOREIGN_KEY_CHECKS = 0;
 

@@ -24,11 +24,30 @@ class AuthService {
             return ['success' => false, 'message' => 'No account found with that email address. Please check and try again, or <a href="/register">create a new account</a>.'];
         }
 
+        // Check if locked
+        if ($user['status'] === 'locked' || (!empty($user['locked_until']) && strtotime($user['locked_until']) > time())) {
+            \App\Models\UserLogin::log((int)$user['id'], 'locked');
+            return ['success' => false, 'message' => 'Your account is temporarily locked due to security policy. Please contact an administrator at info@beyondbarista.rw.'];
+        }
+
         if ($user['status'] !== 'active') {
-            return ['success' => false, 'message' => 'Your account is ' . $user['status'] . '. Please contact support at admin@visionjeunessenouvelle.org.rw for assistance.'];
+            return ['success' => false, 'message' => 'Your account is currently ' . $user['status'] . '. Please contact support at info@beyondbarista.rw for assistance.'];
         }
 
         if (!password_verify($password, $user['password'])) {
+            // Track failed attempts
+            $fails = ((int)($user['failed_login_attempts'] ?? 0)) + 1;
+            $lockedUntil = $fails >= 5 ? date('Y-m-d H:i:s', strtotime('+30 minutes')) : null;
+            $status = $fails >= 5 ? 'locked' : $user['status'];
+            
+            Database::update('users', [
+                'failed_login_attempts' => $fails,
+                'locked_until' => $lockedUntil,
+                'status' => $status
+            ], ['id' => $user['id']]);
+
+            \App\Models\UserLogin::log((int)$user['id'], 'failed');
+
             return ['success' => false, 'message' => 'Incorrect password. Please try again or <a href="/forgot-password">reset your password</a>.'];
         }
 
@@ -39,6 +58,7 @@ class AuthService {
         Session::regenerate();
         Session::set('user', $fullUser);
 
+        \App\Models\UserLogin::log((int)$user['id'], 'success');
         AuditLog::log('user_login', 'user', (int)$user['id'], ['email' => $email]);
 
         return [

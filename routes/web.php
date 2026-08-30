@@ -103,17 +103,38 @@ $router->post('/instructor/quizzes/{quizId}/generate-ai',    [InstructorControll
 $router->post('/instructor/quizzes/{quizId}/questions/store',[InstructorController::class, 'storeQuestion'],        ['auth', 'role:instructor,admin', 'csrf']);
 $router->match(['POST', 'DELETE'], '/instructor/questions/{questionId}/delete', [InstructorController::class, 'deleteQuestion'], ['auth', 'role:instructor,admin', 'csrf']);
 
-// ─── Admin Routes ─────────────────────────────────────────────────────────────
-$router->get('/admin/dashboard',             [AdminController::class, 'dashboard'],      ['auth', 'role:admin']);
+// ─── Invitation Onboarding (Public) ─────────────────────────────────────────
+$router->get('/invite/accept/{token}',        [\App\Controllers\InvitationController::class, 'showAccept']);
+$router->post('/invite/accept/{token}',       [\App\Controllers\InvitationController::class, 'processAccept'], ['csrf']);
 
-// Users
-$router->get('/admin/users',                 [AdminController::class, 'users'],           ['auth', 'role:admin']);
-$router->get('/admin/users/create',          [AdminController::class, 'createUser'],      ['auth', 'role:admin']);
-$router->post('/admin/users/store',          [AdminController::class, 'storeUser'],       ['auth', 'role:admin', 'csrf']);
-$router->get('/admin/users/{id}/edit',       [AdminController::class, 'editUser'],        ['auth', 'role:admin']);
-$router->post('/admin/users/{id}/update',    [AdminController::class, 'updateUser'],      ['auth', 'role:admin', 'csrf']);
-$router->post('/admin/users/{id}/suspend',   [AdminController::class, 'suspendUser'],     ['auth', 'role:admin', 'csrf']);
-$router->post('/admin/users/{id}/activate',  [AdminController::class, 'activateUser'],    ['auth', 'role:admin', 'csrf']);
+// ─── Admin Routes ─────────────────────────────────────────────────────────────
+$router->get('/admin/dashboard',             [AdminController::class, 'dashboard'],      ['auth', 'role:admin,super_admin']);
+
+// Users & IAM
+$router->get('/admin/users',                         [\App\Controllers\AdminUserController::class, 'index'],               ['auth', 'role:admin,super_admin']);
+$router->get('/admin/users/create',                  [\App\Controllers\AdminUserController::class, 'create'],              ['auth', 'role:admin,super_admin']);
+$router->post('/admin/users/store',                  [\App\Controllers\AdminUserController::class, 'store'],               ['auth', 'role:admin,super_admin', 'csrf']);
+$router->post('/admin/users/invite',                 [\App\Controllers\AdminUserController::class, 'sendInvite'],          ['auth', 'role:admin,super_admin', 'csrf']);
+$router->post('/admin/users/bulk',                   [\App\Controllers\AdminUserController::class, 'bulkAction'],          ['auth', 'role:admin,super_admin', 'csrf']);
+$router->post('/admin/users/import/preview',          [\App\Controllers\AdminUserController::class, 'importCsvPreview'],   ['auth', 'role:admin,super_admin']);
+$router->post('/admin/users/import/process',          [\App\Controllers\AdminUserController::class, 'importCsvProcess'],   ['auth', 'role:admin,super_admin', 'csrf']);
+$router->get('/admin/users/export',                  [\App\Controllers\AdminUserController::class, 'exportCsv'],          ['auth', 'role:admin,super_admin']);
+$router->get('/admin/users/{id}',                    [\App\Controllers\AdminUserController::class, 'show'],               ['auth', 'role:admin,super_admin']);
+$router->get('/admin/users/{id}/edit',               [\App\Controllers\AdminUserController::class, 'edit'],               ['auth', 'role:admin,super_admin']);
+$router->post('/admin/users/{id}/update',            [\App\Controllers\AdminUserController::class, 'update'],             ['auth', 'role:admin,super_admin', 'csrf']);
+$router->post('/admin/users/{id}/notes',             [\App\Controllers\AdminUserController::class, 'addNote'],            ['auth', 'role:admin,super_admin', 'csrf']);
+$router->post('/admin/users/{id}/enroll',            [\App\Controllers\AdminUserController::class, 'enrollCourse'],       ['auth', 'role:admin,super_admin', 'csrf']);
+$router->post('/admin/users/{id}/drop-course/{courseId}', [\App\Controllers\AdminUserController::class, 'dropCourse'],     ['auth', 'role:admin,super_admin', 'csrf']);
+$router->post('/admin/users/{id}/reset-password',    [\App\Controllers\AdminUserController::class, 'resetPassword'],       ['auth', 'role:admin,super_admin', 'csrf']);
+
+// Roles & Permissions Matrix
+$router->get('/admin/roles',                         [\App\Controllers\AdminUserController::class, 'rolesIndex'],          ['auth', 'role:admin,super_admin']);
+$router->post('/admin/roles/{id}/update',            [\App\Controllers\AdminUserController::class, 'roleUpdate'],          ['auth', 'role:admin,super_admin', 'csrf']);
+
+// Cohorts & Batches
+$router->get('/admin/cohorts',                       [\App\Controllers\AdminUserController::class, 'cohortsIndex'],        ['auth', 'role:admin,super_admin']);
+$router->post('/admin/cohorts/store',                [\App\Controllers\AdminUserController::class, 'cohortStore'],         ['auth', 'role:admin,super_admin', 'csrf']);
+$router->get('/admin/cohorts/{id}',                  [\App\Controllers\AdminUserController::class, 'cohortShow'],          ['auth', 'role:admin,super_admin']);
 
 // Courses
 $router->get('/admin/courses',               [AdminController::class, 'courses'],          ['auth', 'role:admin']);

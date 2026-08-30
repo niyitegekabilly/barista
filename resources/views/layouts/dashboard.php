@@ -84,8 +84,14 @@
                     <a class="sidebar-nav-item <?= str_contains($_SERVER['REQUEST_URI'], '/admin/dashboard') ? 'active' : '' ?>" href="<?= url('admin/dashboard') ?>">
                         <i class="bi bi-speedometer2 text-danger"></i> <span>Dashboard (KPIs)</span>
                     </a>
-                    <a class="sidebar-nav-item <?= str_contains($_SERVER['REQUEST_URI'], '/admin/users') ? 'active' : '' ?>" href="<?= url('admin/users') ?>">
-                        <i class="bi bi-people-fill"></i> <span>Users & Roles</span>
+                    <a class="sidebar-nav-item <?= (str_contains($_SERVER['REQUEST_URI'], '/admin/users') || str_contains($_SERVER['REQUEST_URI'], '/admin/user')) ? 'active' : '' ?>" href="<?= url('admin/users') ?>">
+                        <i class="bi bi-people-fill"></i> <span>Users & Directory</span>
+                    </a>
+                    <a class="sidebar-nav-item <?= str_contains($_SERVER['REQUEST_URI'], '/admin/roles') ? 'active' : '' ?>" href="<?= url('admin/roles') ?>">
+                        <i class="bi bi-shield-lock-fill"></i> <span>Roles & Permissions</span>
+                    </a>
+                    <a class="sidebar-nav-item <?= str_contains($_SERVER['REQUEST_URI'], '/admin/cohorts') ? 'active' : '' ?>" href="<?= url('admin/cohorts') ?>">
+                        <i class="bi bi-collection-fill"></i> <span>Cohorts & Batches</span>
                     </a>
                     <a class="sidebar-nav-item <?= str_contains($_SERVER['REQUEST_URI'], '/admin/courses') ? 'active' : '' ?>" href="<?= url('admin/courses') ?>">
                         <i class="bi bi-journal-code"></i> <span>Courses & Approval</span>
