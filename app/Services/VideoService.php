@@ -148,10 +148,11 @@ class VideoService
             case 'youtube':
                 $videoId = self::extractYouTubeId($url);
                 $embedUrl = $videoId
-                    ? "https://www.youtube-nocookie.com/embed/{$videoId}?rel=0&modestbranding=1&enablejsapi=1&iv_load_policy=3&playsinline=1"
+                    ? "https://www.youtube-nocookie.com/embed/{$videoId}?rel=0&modestbranding=1&enablejsapi=1&playsinline=1"
                     : $url;
                 return '<div class="video-container-responsive shadow-sm rounded-4 overflow-hidden position-relative" style="background:#000;">
-                            <iframe src="' . htmlspecialchars($embedUrl) . '" 
+                            <iframe id="classroomYoutubePlayer"
+                                    src="' . htmlspecialchars($embedUrl) . '" 
                                     title="' . htmlspecialchars($title) . '" 
                                     frameborder="0" 
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
@@ -163,7 +164,8 @@ class VideoService
                 $fileId = self::extractGoogleDriveId($url);
                 $embedUrl = $fileId ? "https://drive.google.com/file/d/{$fileId}/preview" : $url;
                 return '<div class="video-container-responsive shadow-sm rounded-4 overflow-hidden position-relative" style="background:#000;">
-                            <iframe src="' . htmlspecialchars($embedUrl) . '" 
+                            <iframe id="classroomDrivePlayer"
+                                    src="' . htmlspecialchars($embedUrl) . '" 
                                     title="' . htmlspecialchars($title) . '" 
                                     frameborder="0" 
                                     allow="autoplay"
@@ -177,7 +179,8 @@ class VideoService
                     ? "https://player.vimeo.com/video/{$videoId}?dnt=1&title=0&byline=0&portrait=0"
                     : $url;
                 return '<div class="video-container-responsive shadow-sm rounded-4 overflow-hidden position-relative" style="background:#000;">
-                            <iframe src="' . htmlspecialchars($embedUrl) . '" 
+                            <iframe id="classroomVimeoPlayer"
+                                    src="' . htmlspecialchars($embedUrl) . '" 
                                     title="' . htmlspecialchars($title) . '" 
                                     frameborder="0" 
                                     allow="autoplay; fullscreen; picture-in-picture" 
@@ -229,7 +232,7 @@ class VideoService
                 $rawUrl = preg_replace('/(\?|\&)dl=0/i', '', $url);
                 $rawUrl .= (strpos($rawUrl, '?') === false ? '?' : '&') . 'raw=1';
                 return '<div class="video-player-wrapper shadow-sm rounded-4 overflow-hidden bg-black p-0 position-relative">
-                            <video controls controlsList="nodownload" oncontextmenu="return false;" style="width:100%;max-height:560px;display:block;margin:0 auto;background:#000;">
+                            <video id="classroomHtml5Video" controls controlsList="nodownload" oncontextmenu="return false;" style="width:100%;max-height:560px;display:block;margin:0 auto;background:#000;">
                                 <source src="' . htmlspecialchars($rawUrl) . '" type="video/mp4">
                                 Your browser does not support HTML5 video.
                             </video>
@@ -237,7 +240,7 @@ class VideoService
 
             case 'direct':
                 return '<div class="video-player-wrapper shadow-sm rounded-4 overflow-hidden bg-black p-0 position-relative">
-                            <video controls controlsList="nodownload" oncontextmenu="return false;" style="width:100%;max-height:560px;display:block;margin:0 auto;background:#000;">
+                            <video id="classroomHtml5Video" controls controlsList="nodownload" oncontextmenu="return false;" style="width:100%;max-height:560px;display:block;margin:0 auto;background:#000;">
                                 <source src="' . htmlspecialchars($url) . '" type="video/mp4">
                                 Your browser does not support HTML5 video.
                             </video>

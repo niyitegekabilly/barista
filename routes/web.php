@@ -75,10 +75,16 @@ $router->get('/student/wishlist',                           [StudentController::
 $router->get('/student/subscription',                       [StudentController::class, 'subscription'],     ['auth']);
 $router->post('/student/subscription/cancel',               [StudentController::class, 'cancelSubscription'], ['auth', 'csrf']);
 
-// Classroom
+// Classroom & Learning Experience
 $router->get('/student/classroom/{courseSlug}',             [ClassroomController::class, 'show'],           ['auth']);
 $router->get('/student/classroom/{courseSlug}/{lessonId}',  [ClassroomController::class, 'show'],           ['auth']);
+$router->post('/student/lesson/progress',                   [ClassroomController::class, 'saveProgress'],   ['auth']);
 $router->post('/student/lesson/complete',                   [ClassroomController::class, 'completeLesson'], ['auth', 'csrf']);
+$router->post('/student/lesson/notes',                      [ClassroomController::class, 'addNote'],        ['auth', 'csrf']);
+$router->match(['POST', 'DELETE'], '/student/lesson/notes/{id}/delete', [ClassroomController::class, 'deleteNote'], ['auth', 'csrf']);
+$router->post('/student/lesson/discussions',                [ClassroomController::class, 'postDiscussion'], ['auth', 'csrf']);
+$router->post('/student/lesson/bookmarks',                  [ClassroomController::class, 'toggleBookmark'], ['auth', 'csrf']);
+$router->get('/student/lesson/resources/{id}/download',     [ClassroomController::class, 'downloadResource'], ['auth']);
 
 // Quiz
 $router->get('/student/quiz/{quizId}',                      [QuizController::class, 'show'],                ['auth']);
