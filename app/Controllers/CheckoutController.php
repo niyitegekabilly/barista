@@ -49,7 +49,7 @@ class CheckoutController extends Controller {
         $courseId = (int)$request->input('course_id');
         $userId = auth_id();
 
-        $result = Coupon::findValid($code, $amount, $courseId, $userId);
+        $result = \App\Services\CouponService::validateCoupon($code, $amount, $courseId, $userId);
         Response::json($result);
     }
 

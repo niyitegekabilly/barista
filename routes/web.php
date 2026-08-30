@@ -205,11 +205,29 @@ $router->post('/admin/orders/{id}/verify-manual',     [\App\Controllers\AdminOrd
 // Admin Payments Management
 $router->get('/admin/payments',                       [\App\Controllers\AdminPaymentController::class, 'index'],                ['auth', 'role:admin,super_admin']);
 
-// Coupons
-$router->get('/admin/coupons',                        [AdminController::class, 'coupons'],                                      ['auth', 'role:admin,super_admin']);
-$router->post('/admin/coupons/store',                 [AdminController::class, 'storeCoupon'],                                  ['auth', 'role:admin,super_admin', 'csrf']);
-$router->post('/admin/coupons/{id}/toggle',           [AdminController::class, 'toggleCoupon'],                                 ['auth', 'role:admin,super_admin', 'csrf']);
-$router->match(['POST', 'DELETE'], '/admin/coupons/{id}/delete', [AdminController::class, 'deleteCoupon'],                    ['auth', 'role:admin,super_admin', 'csrf']);
+// Coupons & Promotions Hub
+$router->get('/admin/coupons',                        [\App\Controllers\AdminCouponController::class, 'index'],                 ['auth', 'role:admin,super_admin']);
+$router->get('/admin/coupons/dashboard',              [\App\Controllers\AdminCouponController::class, 'dashboard'],             ['auth', 'role:admin,super_admin']);
+$router->get('/admin/coupons/create',                 [\App\Controllers\AdminCouponController::class, 'create'],                ['auth', 'role:admin,super_admin']);
+$router->post('/admin/coupons/store',                 [\App\Controllers\AdminCouponController::class, 'store'],                 ['auth', 'role:admin,super_admin', 'csrf']);
+$router->match(['GET', 'POST'], '/admin/coupons/bulk-generate', [\App\Controllers\AdminCouponController::class, 'bulkGenerate'], ['auth', 'role:admin,super_admin', 'csrf']);
+$router->get('/admin/coupons/redemptions',            [\App\Controllers\AdminCouponController::class, 'redemptions'],          ['auth', 'role:admin,super_admin']);
+$router->get('/admin/coupons/export',                 [\App\Controllers\AdminCouponController::class, 'export'],               ['auth', 'role:admin,super_admin']);
+$router->get('/admin/coupons/export-redemptions',      [\App\Controllers\AdminCouponController::class, 'exportRedemptions'],    ['auth', 'role:admin,super_admin']);
+$router->get('/admin/coupons/{id}',                   [\App\Controllers\AdminCouponController::class, 'show'],                  ['auth', 'role:admin,super_admin']);
+$router->get('/admin/coupons/{id}/edit',              [\App\Controllers\AdminCouponController::class, 'edit'],                  ['auth', 'role:admin,super_admin']);
+$router->post('/admin/coupons/{id}/update',           [\App\Controllers\AdminCouponController::class, 'update'],                ['auth', 'role:admin,super_admin', 'csrf']);
+$router->post('/admin/coupons/{id}/duplicate',        [\App\Controllers\AdminCouponController::class, 'duplicate'],             ['auth', 'role:admin,super_admin', 'csrf']);
+$router->post('/admin/coupons/{id}/toggle',           [\App\Controllers\AdminCouponController::class, 'toggle'],                ['auth', 'role:admin,super_admin', 'csrf']);
+$router->post('/admin/coupons/{id}/archive',          [\App\Controllers\AdminCouponController::class, 'archive'],               ['auth', 'role:admin,super_admin', 'csrf']);
+$router->match(['POST', 'DELETE'], '/admin/coupons/{id}/delete', [\App\Controllers\AdminCouponController::class, 'delete'],   ['auth', 'role:admin,super_admin', 'csrf']);
+
+// Marketing Campaigns
+$router->get('/admin/campaigns',                      [\App\Controllers\AdminCampaignController::class, 'index'],               ['auth', 'role:admin,super_admin']);
+$router->post('/admin/campaigns/store',               [\App\Controllers\AdminCampaignController::class, 'store'],               ['auth', 'role:admin,super_admin', 'csrf']);
+$router->get('/admin/campaigns/{id}',                 [\App\Controllers\AdminCampaignController::class, 'show'],                ['auth', 'role:admin,super_admin']);
+$router->post('/admin/campaigns/{id}/update',          [\App\Controllers\AdminCampaignController::class, 'update'],              ['auth', 'role:admin,super_admin', 'csrf']);
+$router->match(['POST', 'DELETE'], '/admin/campaigns/{id}/delete', [\App\Controllers\AdminCampaignController::class, 'delete'], ['auth', 'role:admin,super_admin', 'csrf']);
 
 // Blog
 $router->get('/admin/blog',                  [AdminController::class, 'blog'],             ['auth', 'role:admin']);

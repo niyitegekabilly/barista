@@ -45,7 +45,7 @@ class OrderService {
 
         // Server-side coupon evaluation
         if (!empty($couponCode) && $coursePrice > 0) {
-            $couponCheck = Coupon::findValid($couponCode, $coursePrice, $courseId, $userId);
+            $couponCheck = CouponService::validateCoupon($couponCode, $coursePrice, $courseId, $userId);
             if ($couponCheck['valid']) {
                 $couponId = (int)$couponCheck['coupon']['id'];
                 $discountAmount = (float)$couponCheck['discount_amount'];
@@ -193,9 +193,17 @@ class OrderService {
             'updated_at'     => date('Y-m-d H:i:s')
         ], ['id' => $orderId]);
 
-        // 3. Increment Coupon usage if applied
+        // 3. Record Coupon Redemption if coupon was applied
         if (!empty($order['coupon_id'])) {
-            Database::query("UPDATE coupons SET uses_count = uses_count + 1 WHERE id = :cid", ['cid' => $order['coupon_id']]);
+            CouponService::recordRedemption(
+                (int)$order['coupon_id'],
+                $orderId,
+                (int)$order['user_id'],
+                (float)($order['subtotal_amount'] ?: $order['total_amount']),
+                (float)($order['discount_amount'] ?? 0),
+                (float)$payment['amount'],
+                !empty($order['items'][0]['item_id']) ? (int)$order['items'][0]['item_id'] : null
+            );
         }
 
         // 4. Create / Activate Course Enrollment(s)

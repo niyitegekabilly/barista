@@ -23,6 +23,7 @@ require BASE_PATH . '/app/Services/Payment/Gateways/ManualBankPaymentGateway.php
 require BASE_PATH . '/app/Services/Payment/Gateways/SandboxPaymentGateway.php';
 require BASE_PATH . '/app/Services/Payment/PaymentGatewayManager.php';
 require BASE_PATH . '/app/Services/InvoiceService.php';
+require BASE_PATH . '/app/Services/CouponService.php';
 require BASE_PATH . '/app/Services/OrderService.php';
 require BASE_PATH . '/app/Services/FinanceService.php';
 
