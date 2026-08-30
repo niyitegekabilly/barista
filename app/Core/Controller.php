@@ -16,6 +16,9 @@ abstract class Controller
      */
     protected function render(string $view, array $data = [], string $layout = 'main'): void
     {
+        if ($layout === 'admin') {
+            $layout = 'dashboard';
+        }
         $layoutFile = 'layouts/' . $layout;
         echo View::render($view, $data, $layoutFile);
     }

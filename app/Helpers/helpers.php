@@ -273,6 +273,12 @@ if (!function_exists('csrf_field')) {
     }
 }
 
+if (!function_exists('csrf_name')) {
+    function csrf_name(): string {
+        return '_csrf_token';
+    }
+}
+
 if (!function_exists('session')) {
     function session(?string $key = null, mixed $default = null): mixed {
         if ($key === null) {

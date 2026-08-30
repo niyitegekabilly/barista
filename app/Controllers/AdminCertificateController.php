@@ -81,7 +81,7 @@ class AdminCertificateController extends Controller {
             'courseId'     => $courseId,
             'courses'      => $courses,
             'users'        => $users
-        ], 'admin');
+        ], 'dashboard');
     }
 
     /**

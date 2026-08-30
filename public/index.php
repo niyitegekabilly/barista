@@ -11,26 +11,26 @@ define('BASE_PATH', dirname(__DIR__));
 // Set up autoloader (Check vendor/autoload.php first, fallback to native PSR-4 autoloader)
 if (file_exists(BASE_PATH . '/vendor/autoload.php')) {
     require BASE_PATH . '/vendor/autoload.php';
-} else {
-    spl_autoload_register(function ($class) {
-        $prefix = 'App\\';
-        $baseDir = BASE_PATH . '/app/';
-
-        $len = strlen($prefix);
-        if (strncmp($prefix, $class, $len) !== 0) {
-            return;
-        }
-
-        $relativeClass = substr($class, $len);
-        $file = $baseDir . str_replace('\\', '/', $relativeClass) . '.php';
-
-        if (file_exists($file)) {
-            require $file;
-        }
-    });
-
-    require BASE_PATH . '/app/Helpers/helpers.php';
 }
+
+spl_autoload_register(function ($class) {
+    $prefix = 'App\\';
+    $baseDir = BASE_PATH . '/app/';
+
+    $len = strlen($prefix);
+    if (strncmp($prefix, $class, $len) !== 0) {
+        return;
+    }
+
+    $relativeClass = substr($class, $len);
+    $file = $baseDir . str_replace('\\', '/', $relativeClass) . '.php';
+
+    if (file_exists($file)) {
+        require $file;
+    }
+});
+
+require_once BASE_PATH . '/app/Helpers/helpers.php';
 
 // Error handling & Debugging
 $debug = config('app.debug', false);
