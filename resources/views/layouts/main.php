@@ -22,25 +22,25 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-    <!-- Top Bar for Announcements & Language -->
+    <!-- Top Bar for Announcements & Language (Dark Chocolate & Gold) -->
     <div class="topbar-luxury py-2 px-3 d-none d-md-block">
         <div class="container d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-3">
                 <span class="badge-location d-inline-flex align-items-center">
                     <span class="status-dot"></span> RWANDA
                 </span>
-                <span class="topbar-link small"><i class="bi bi-geo-alt-fill text-warning me-1"></i> KG 11 Ave, Kigali Innovation Hub</span>
-                <span class="text-white-50 opacity-25">|</span>
-                <a href="tel:+250788000111" class="topbar-link small"><i class="bi bi-telephone-fill text-warning me-1"></i> +250 788 000 111</a>
+                <span class="topbar-link small"><i class="bi bi-geo-alt-fill me-1"></i> KG 11 Ave, Kigali Innovation Hub</span>
+                <span class="topbar-divider">|</span>
+                <a href="tel:+250788000111" class="topbar-link small"><i class="bi bi-telephone-fill me-1"></i> +250 788 000 111</a>
             </div>
             <div class="d-flex align-items-center gap-3">
                 <a href="<?= url('certificate/verify') ?>" class="topbar-link small d-flex align-items-center">
-                    <i class="bi bi-patch-check-fill text-warning me-1 fs-6"></i> <?= __('app.verify_certificate') ?>
+                    <i class="bi bi-patch-check-fill me-1 fs-6"></i> <?= __('app.verify_certificate') ?>
                 </a>
-                <span class="text-white-50 opacity-25">|</span>
+                <span class="topbar-divider">|</span>
                 <div class="dropdown">
-                    <button class="btn btn-sm text-white-50 dropdown-toggle p-0 small fw-medium" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-globe2 me-1 text-warning"></i> <?= strtoupper(session('locale', 'en')) ?>
+                    <button class="btn btn-sm topbar-dropdown-btn dropdown-toggle p-0 small" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-globe2 me-1"></i> <?= strtoupper(session('locale', 'en')) ?>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 py-1" style="border-radius: 10px; font-size: 0.85rem;">
                         <li><a class="dropdown-item py-2" href="?lang=en">🇬🇧 English</a></li>

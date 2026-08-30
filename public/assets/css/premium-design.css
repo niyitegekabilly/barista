@@ -98,46 +98,71 @@ a {
 a:hover { color: var(--accent); }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   TOPBAR LUXURY
+   TOPBAR LUXURY (DARK CHOCOLATE & GOLDEN ACCENTS)
    ───────────────────────────────────────────────────────────────────────── */
 .topbar-luxury {
-    background: linear-gradient(90deg, #120904 0%, #1c0e06 50%, #120904 100%) !important;
-    border-bottom: 1px solid rgba(212, 165, 116, 0.18);
-    font-size: 0.815rem;
-    color: #e6dfd8;
+    background: linear-gradient(90deg, #180D06 0%, #26140A 50%, #180D06 100%) !important;
+    border-bottom: 1px solid rgba(229, 184, 105, 0.25);
+    font-size: 0.825rem;
+    color: #F3C78E;
     position: relative;
     z-index: 1030;
+    letter-spacing: 0.2px;
 }
 
 .topbar-luxury .badge-location {
-    background: linear-gradient(135deg, #d97706, #b45309);
-    color: #ffffff;
-    font-weight: 700;
+    background: linear-gradient(135deg, #FBBF24 0%, #D97706 100%);
+    color: #1A0D06 !important;
+    font-weight: 800;
     font-size: 0.72rem;
-    letter-spacing: 0.6px;
-    padding: 0.25rem 0.6rem;
+    letter-spacing: 0.8px;
+    padding: 0.25rem 0.65rem;
     border-radius: 9999px;
-    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.35);
+    box-shadow: 0 2px 10px rgba(245, 158, 11, 0.35);
 }
 
 .topbar-luxury .topbar-link {
-    color: #d1c7bc;
+    color: #F3C78E !important;
     text-decoration: none;
-    transition: all 0.2s ease;
+    transition: all 0.25s ease;
     font-weight: 500;
+    display: inline-flex;
+    align-items: center;
 }
+
+.topbar-luxury .topbar-link i {
+    color: #FBBF24 !important;
+}
+
 .topbar-luxury .topbar-link:hover {
-    color: #f59e0b;
+    color: #FFF3DD !important;
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+    transform: translateY(-1px);
+}
+
+.topbar-luxury .topbar-divider {
+    color: rgba(243, 199, 142, 0.3);
+    font-size: 0.8rem;
+}
+
+.topbar-luxury .topbar-dropdown-btn {
+    color: #F3C78E !important;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.topbar-luxury .topbar-dropdown-btn:hover {
+    color: #FFF3DD !important;
 }
 
 .topbar-luxury .status-dot {
     display: inline-block;
     width: 7px;
     height: 7px;
-    background-color: #10b981;
+    background-color: #10B981;
     border-radius: 50%;
     margin-right: 6px;
-    box-shadow: 0 0 8px #10b981;
+    box-shadow: 0 0 8px #10B981;
     animation: pulseGlow 2s infinite;
 }
 
